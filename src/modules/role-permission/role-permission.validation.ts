@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { documentId } from './../validate/id';
+import { documentId } from '../validate';
 
 export const rolePermissionSchema = z.object({
   body: z.object({

@@ -1,7 +1,7 @@
 import { ClientSession, Document, Model, Types } from 'mongoose';
 import { QueryResult } from '../paginate/paginate';
 import { AccessAndRefreshTokens } from '../token/token.interfaces';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 
 export interface IUser {
   username: string;

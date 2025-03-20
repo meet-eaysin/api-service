@@ -1,12 +1,12 @@
-import { requestMiddleware } from '@/middleware/request-middleware';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { emailService } from '../email';
 import { tokenService } from '../token';
 import { userService } from '../user';
 import { IUserDoc } from '../user/user.interfaces';
-import catchAsync from '../utils/catchAsync';
+import catchAsync from '../utils/catch-async';
 import { sendResponse } from '../utils/send-response';
+import { requestMiddleware } from './auth.middleware';
 import { authService } from './auth.service';
 import {
   forgotPasswordBodySchema,

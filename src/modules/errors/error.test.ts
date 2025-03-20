@@ -5,13 +5,18 @@ import httpMocks from 'node-mocks-http';
 import winston from 'winston';
 import config from '../../config/config';
 import logger from '../logger/logger';
-import ApiError from './ApiError';
+import { ApiError } from './ApiError';
 import { errorConverter, errorHandler } from './error';
+import { ErrorCode } from './error-codes';
 
 describe('Error middlewares', () => {
   describe('Error converter', () => {
     test('should return the same ApiError object it was called with', () => {
-      const error = new ApiError(httpStatus.BAD_REQUEST, 'Any error');
+      const error = new ApiError({
+        statusCode: httpStatus.BAD_REQUEST,
+        message: 'Any error',
+        code: ErrorCode.UNEXPECTED_ERROR,
+      });
       const next = jest.fn();
 
       errorConverter(error, httpMocks.createRequest(), httpMocks.createResponse(), next);
@@ -108,7 +113,11 @@ describe('Error middlewares', () => {
     });
 
     test('should send proper error response and put the error message in res.locals', () => {
-      const error = new ApiError(httpStatus.BAD_REQUEST, 'Any error');
+      const error = new ApiError({
+        statusCode: httpStatus.BAD_REQUEST,
+        message: 'Any error',
+        code: ErrorCode.UNEXPECTED_ERROR,
+      });
       const res = httpMocks.createResponse();
       const next = jest.fn();
       const sendSpy = jest.spyOn(res, 'send');
@@ -121,7 +130,11 @@ describe('Error middlewares', () => {
 
     test('should put the error stack in the response if in development mode', () => {
       config.env = 'development';
-      const error = new ApiError(httpStatus.BAD_REQUEST, 'Any error');
+      const error = new ApiError({
+        statusCode: httpStatus.BAD_REQUEST,
+        message: 'Any error',
+        code: ErrorCode.UNEXPECTED_ERROR,
+      });
       const res = httpMocks.createResponse();
       const next = jest.fn();
       const sendSpy = jest.spyOn(res, 'send');
@@ -136,7 +149,11 @@ describe('Error middlewares', () => {
 
     test('should send internal server error status and message if in production mode and error is not operational', () => {
       config.env = 'production';
-      const error = new ApiError(httpStatus.BAD_REQUEST, 'Any error', false);
+      const error = new ApiError({
+        statusCode: httpStatus.BAD_REQUEST,
+        message: 'Any error',
+        code: ErrorCode.UNEXPECTED_ERROR,
+      });
       const res = httpMocks.createResponse();
       const next = jest.fn();
       const sendSpy = jest.spyOn(res, 'send');
@@ -155,7 +172,11 @@ describe('Error middlewares', () => {
 
     test('should preserve original error status and message if in production mode and error is operational', () => {
       config.env = 'production';
-      const error = new ApiError(httpStatus.BAD_REQUEST, 'Any error');
+      const error = new ApiError({
+        statusCode: httpStatus.BAD_REQUEST,
+        message: 'Any error',
+        code: ErrorCode.UNEXPECTED_ERROR,
+      });
       const res = httpMocks.createResponse();
       const next = jest.fn();
       const sendSpy = jest.spyOn(res, 'send');

@@ -1,15 +1,14 @@
-import { requestMiddleware } from '@/middleware/request-middleware';
-import catchAsync from '@/modules/utils/catchAsync';
+import catchAsync from '@/modules/utils/catch-async';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
+import { requestMiddleware } from '../auth';
 import { ApiError } from '../errors';
 import { ErrorCode } from '../errors/error-codes';
 import { IOptions } from '../paginate/paginate';
 import { pick } from '../utils';
 import { sendResponse } from '../utils/send-response';
-import { DocumentId } from '../validate/id';
-import { querySchema } from '../validate/query';
+import { DocumentId, querySchema } from '../validate';
 import { rolePermissionService } from './index';
 import { rolePermissionParamsSchema, rolePermissionSchema, updateRolePermissionSchema } from './role-permission.validation';
 

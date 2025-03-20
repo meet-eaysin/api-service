@@ -2,7 +2,7 @@ import { ApiError } from '@/modules/errors';
 import httpStatus from 'http-status';
 import { ErrorCode } from '../errors/error-codes';
 import { IOptions } from '../paginate/paginate';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 import { IEmployeeDoc } from './employee.interface';
 import Employee from './employee.model';
 import { EmployeeSchemaType, UpdateEmployeeSchemaType } from './employee.validation';

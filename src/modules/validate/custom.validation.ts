@@ -1,6 +1,18 @@
+import mongoose from 'mongoose';
 import { z } from 'zod';
 
-// Password Validation Schema
+export const querySchema = z.object({
+  sortBy: z.string().default('-createdAt'),
+  projectBy: z.string().optional(),
+  populate: z.string().optional(),
+  limit: z.number().min(1).max(100).default(10),
+  page: z.number().min(1).default(1),
+});
+
+export const documentId = z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+  message: 'Invalid ObjectId',
+});
+
 export const passwordSchema = z
   .string()
   .min(8, 'Password must be at least 8 characters')
@@ -12,4 +24,6 @@ export const passwordSchema = z
   });
 
 // Type exports
+export type DocumentId = mongoose.Types.ObjectId | string;
+export type QuerySchema = z.infer<typeof querySchema>;
 export type PasswordType = z.infer<typeof passwordSchema>;

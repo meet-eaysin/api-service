@@ -1,4 +1,5 @@
-import { ApiErrorOptions, InvalidFields } from '../auth/auth.interface';
+import { InvalidFields } from '@/types';
+import { ErrorOptions } from '../auth/auth.interface';
 
 export class ApiError extends Error {
   statusCode: number;
@@ -7,7 +8,7 @@ export class ApiError extends Error {
   data?: any;
   [key: string]: any;
 
-  constructor(options: ApiErrorOptions) {
+  constructor(options: ErrorOptions) {
     super(options.message);
 
     this.name = 'ApplicationError';

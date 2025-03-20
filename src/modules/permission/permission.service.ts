@@ -4,7 +4,7 @@ import httpStatus from 'http-status';
 import { ClientSession, FilterQuery } from 'mongoose';
 import { replaceById } from '../employee/employee.service';
 import { IOptions, QueryResult } from '../paginate/paginate';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 import { IPermissionDoc, PermissionAction } from './permission.interface';
 import { Permission } from './permission.model';
 import { CreatePermissionBody, UpdatePermissionBody } from './permission.validation';

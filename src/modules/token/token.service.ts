@@ -7,7 +7,7 @@ import { ApiError } from '../errors';
 import { ErrorCode } from '../errors/error-codes';
 import { userService } from '../user';
 import { IUserDoc } from '../user/user.interfaces';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 import { AccessAndRefreshTokens, ITokenDoc } from './token.interfaces';
 import Token from './token.model';
 import tokenTypes from './token.types';

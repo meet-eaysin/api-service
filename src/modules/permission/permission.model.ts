@@ -1,7 +1,7 @@
 import mongoose, { FilterQuery, model, Schema } from 'mongoose';
 import { paginate } from '../paginate';
 import { toJSON } from '../toJSON';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 import { IPermissionDoc, IPermissionModel, PermissionAction } from './permission.interface';
 
 const permissionSchema = new Schema<IPermissionDoc, IPermissionModel>(

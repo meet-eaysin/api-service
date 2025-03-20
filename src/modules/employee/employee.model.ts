@@ -2,7 +2,7 @@ import { parsePhoneNumber } from 'libphonenumber-js';
 import { model, Schema } from 'mongoose';
 import { paginate } from '../paginate';
 import { toJSON } from '../toJSON';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 import { IEmployeeDoc, IEmployeeModel } from './employee.interface';
 
 const employeeSchema = new Schema<IEmployeeDoc, IEmployeeModel>(

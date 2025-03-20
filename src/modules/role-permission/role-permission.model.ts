@@ -1,7 +1,7 @@
 import mongoose, { model, Schema, Types } from 'mongoose';
 import { paginate } from '../paginate';
 import { toJSON } from '../toJSON';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 import { IRolePermissionDoc, IRolePermissionModel } from './role-permission.interface';
 
 const rolePermissionSchema = new Schema<IRolePermissionDoc, IRolePermissionModel>(

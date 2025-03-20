@@ -1,40 +1,19 @@
-import { Response } from 'express';
+import { InvalidFields } from '@/types';
+import { ZodSchema } from 'zod';
 
-export interface InvalidFields {
-  field: string;
-  messages: string;
-}
-
-export interface ResponseError {
-  code: string;
-  message: string;
-  invalidFields?: InvalidFields[];
-  data?: any;
-  [key: string]: any;
-}
-
-export interface ApiResponse<T = any> {
-  success: boolean;
-  message: string;
-  data?: T;
-  error?: ResponseError;
-  [key: string]: any;
-}
-
-export interface SendResponseOptions<T = any> {
-  res: Response;
-  statusCode: number;
-  message: string;
-  data?: T;
-  error?: ResponseError;
-  [key: string]: any;
-}
-
-export interface ApiErrorOptions {
+export interface ErrorOptions {
   statusCode: number;
   code: string;
   message: string;
   invalidFields?: InvalidFields[] | undefined;
   data?: any;
   [key: string]: any;
+}
+
+export interface HandlerOptions {
+  validation?: {
+    body?: ZodSchema;
+    query?: ZodSchema;
+    params?: ZodSchema;
+  };
 }

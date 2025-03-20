@@ -1,6 +1,6 @@
 import mongoose, { ClientSession, Document, FilterQuery, Model } from 'mongoose';
 import { IOptions, QueryResult } from '../paginate/paginate';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 
 export enum PermissionAction {
   READ = 'read',

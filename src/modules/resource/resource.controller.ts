@@ -1,7 +1,7 @@
 import config from '@/config/config';
-import { requestMiddleware } from '@/middleware/request-middleware';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
+import { requestMiddleware } from '../auth';
 import { catchAsync } from '../utils';
 import { sendResponse } from '../utils/send-response';
 import { ConfigMethodActions, HttpAction, HttpMethod } from './resource.interface';

@@ -2,7 +2,7 @@ import { ApiError } from '@/modules/errors';
 import httpStatus from 'http-status';
 import { ClientSession, FilterQuery } from 'mongoose';
 import { IOptions, QueryResult } from '../paginate/paginate';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 import { IRoleDoc } from './role.interface';
 import { Role } from './role.model';
 import { RoleSchemaType, UpdateRoleSchemaType } from './role.validation';

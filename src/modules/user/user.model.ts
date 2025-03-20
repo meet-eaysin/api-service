@@ -3,7 +3,7 @@ import mongoose, { ClientSession, Schema } from 'mongoose';
 import validator from 'validator';
 import paginate from '../paginate/paginate';
 import toJSON from '../toJSON/toJSON';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 import { IUserDoc, IUserModel } from './user.interfaces';
 
 const userSchema = new mongoose.Schema<IUserDoc, IUserModel>(

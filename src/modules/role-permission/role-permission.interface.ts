@@ -2,7 +2,7 @@ import { ClientSession, Document, FilterQuery, Model, Types } from 'mongoose';
 import { QueryResult } from '../paginate/paginate';
 import { IPermissionDoc } from '../permission/permission.interface';
 import { IRoleDoc } from '../role/role.interface';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 
 export interface IRolePermission {
   role: Types.ObjectId | IRoleDoc;

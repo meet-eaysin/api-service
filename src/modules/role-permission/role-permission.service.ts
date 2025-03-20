@@ -2,7 +2,7 @@ import { ApiError } from '@/modules/errors';
 import httpStatus from 'http-status';
 import { ClientSession, Types } from 'mongoose';
 import { IOptions, QueryResult } from '../paginate/paginate';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 import { IRolePermissionDoc } from './role-permission.interface';
 import { RolePermission } from './role-permission.model';
 import { RolePermissionSchemaType, UpdateRolePermissionSchemaType } from './role-permission.validation';

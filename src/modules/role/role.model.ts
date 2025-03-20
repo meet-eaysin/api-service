@@ -1,7 +1,7 @@
 import mongoose, { model, Schema } from 'mongoose';
 import { paginate } from '../paginate';
 import { toJSON } from '../toJSON';
-import { DocumentId } from '../validate/id';
+import { DocumentId } from '../validate';
 import { IRoleDoc, IRoleModel } from './role.interface';
 
 const roleSchema = new Schema<IRoleDoc, IRoleModel>(

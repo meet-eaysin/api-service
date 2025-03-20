@@ -1,9 +1,9 @@
+import { DocumentId } from '@/modules/validate';
 import httpStatus from 'http-status';
 import { ClientSession } from 'mongoose';
 import { ApiError } from '../errors';
 import { ErrorCode } from '../errors/error-codes';
 import { IOptions, QueryResult } from '../paginate/paginate';
-import { DocumentId } from '../validate/id';
 import { IUserDoc } from './user.interfaces';
 import User from './user.model';
 import { UpdateUserSchemaType, UserSchemaType } from './user.validation';

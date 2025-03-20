@@ -14,6 +14,7 @@ import setupTestDB from '../jest/setupTestDB';
 import Token from '../token/token.model';
 import * as tokenService from '../token/token.service';
 import tokenTypes from '../token/token.types';
+import { IUserDoc } from '../user/user.interfaces';
 import User from '../user/user.model';
 import { UserSchemaType } from '../user/user.validation';
 
@@ -435,7 +436,7 @@ describe('Auth middleware', () => {
     await authenticateAndAuthorize()(req, httpMocks.createResponse(), next);
 
     expect(next).toHaveBeenCalledWith();
-    expect(req.user._id).toEqual(userOne._id);
+    expect((req.user as IUserDoc)?._id).toEqual(userOne._id);
   });
 
   test('should call next with unauthorized error if access token is not found in header', async () => {
