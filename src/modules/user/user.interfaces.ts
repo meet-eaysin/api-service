@@ -19,7 +19,11 @@ export interface IUserDoc extends IUser, Document {
 }
 
 export interface IUserModel extends Model<IUserDoc> {
-  paginate(filter: Record<string, any>, options: Record<string, any>, session?: ClientSession): Promise<QueryResult>;
+  paginate(
+    filter: Record<string, any>,
+    options: Record<string, any>,
+    session?: ClientSession,
+  ): Promise<QueryResult<IUserDoc>>;
   isUsernameTaken(username: string, excludeUserId?: DocumentId, session?: ClientSession): Promise<boolean>;
   isEmailTaken(email: string, excludeUserId?: DocumentId, session?: ClientSession): Promise<boolean>;
 }

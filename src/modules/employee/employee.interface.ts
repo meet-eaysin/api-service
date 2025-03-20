@@ -48,7 +48,7 @@ export interface IEmployee {
 export type IEmployeeDoc = IEmployee & Document;
 
 export interface IEmployeeModel extends Model<IEmployeeDoc> {
-  paginate(filter: FilterQuery<IEmployeeDoc>, options: IOptions): Promise<QueryResult>;
+  paginate(filter: FilterQuery<IEmployeeDoc>, options: IOptions): Promise<QueryResult<IEmployeeDoc>>;
   isEmailTaken(email: string, excludeUserId?: DocumentId): Promise<boolean>;
 }
 

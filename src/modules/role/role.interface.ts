@@ -12,6 +12,10 @@ export interface IRole {
 export interface IRoleDoc extends IRole, Document {}
 
 export interface IRoleModel extends Model<IRoleDoc> {
-  paginate(filter: FilterQuery<IRoleDoc>, options: IOptions, session?: mongoose.ClientSession): Promise<QueryResult>;
+  paginate(
+    filter: FilterQuery<IRoleDoc>,
+    options: IOptions,
+    session?: mongoose.ClientSession,
+  ): Promise<QueryResult<IRoleDoc>>;
   isRoleNameTaken(name: string, excludeRoleId?: DocumentId, session?: mongoose.ClientSession): Promise<boolean>;
 }

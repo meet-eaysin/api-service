@@ -28,14 +28,14 @@ export const seedSuperAdmin = async () => {
     );
 
     // 2. Create Permissions for all resources
-    const resources = resourceService.getConfiguredResources();
+    const resources = resourceService.getResources();
     const allActions = Object.values(PermissionAction);
 
     for (const resource of resources) {
       // Create permission
       const permission = await permissionService.create(
         {
-          resource,
+          resource: resource.name,
           action: allActions,
         },
         session,
