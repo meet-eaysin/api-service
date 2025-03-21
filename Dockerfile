@@ -10,7 +10,7 @@ COPY ./public ./public
 
 RUN ls -a
 
-RUN yarn install --pure-lockfile && yarn compile
+RUN yarn install --pure-lockfile && yarn build
 
 # production stage
 FROM base as production
