@@ -1,5 +1,5 @@
 # development stage
-FROM node:14-alpine as base
+FROM node:20.12.2-alpine as base
 
 WORKDIR /usr/src/app
 
@@ -12,7 +12,6 @@ RUN ls -a
 RUN yarn install --pure-lockfile && yarn compile
 
 # production stage
-
 FROM base as production
 
 WORKDIR /usr/prod/app
@@ -24,3 +23,5 @@ COPY package.json yarn.lock ecosystem.config.json ./
 RUN yarn install --production --pure-lockfile
 
 COPY --from=base /usr/src/app/dist ./dist
+
+CMD ["node", "dist/index.js"]

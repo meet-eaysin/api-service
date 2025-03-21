@@ -1,36 +1,41 @@
-version: '3'
+version: '3.8'
 
 services:
   mongo:
+    image: mongo:7.0
     container_name: mongo
-    image: mongo:4.2.1-bionic
-    restart: always
+    restart: unless-stopped
     ports:
-      - "27018:27017"
+      - '27018:27017'
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: eaysin-dev
+      MONGO_INITDB_ROOT_PASSWORD: Aw1FXEqQUuPegFG5
     networks:
       - backend
+
   app:
     container_name: ts-node-app
-    build: 
+    build:
       context: .
-      dockerfile: Dockerfile
-      target: base
-    restart: always
+      target: production
+    restart: unless-stopped
     env_file: .env
-    expose:
-      - ${PORT}
     ports:
-      - ${PORT}:${PORT}
-    environment: 
-      - MONGODB_URL=mongodb://mongo:27017/node-boilerplate
+      - '${PORT}:${PORT}'
+    environment:
+      - MONGODB_URL=mongodb+srv://eaysin-dev:Aw1FXEqQUuPegFG5@cluster0.uzmru.mongodb.net/sync-workbench?retryWrites=true&w=majority&appName=Cluster0
       - CLIENT_URL=${CLIENT_URL}
-    links: 
-      - mongo  
     depends_on:
-      - mongo  
+      mongo:
+        condition: service_healthy
     networks:
       - backend
 
 networks:
   backend:
-    driver: bridge    
+    driver: bridge
+
+volumes:
+  mongo-data:
