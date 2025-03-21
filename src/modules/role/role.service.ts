@@ -71,6 +71,18 @@ const queryById = async (id: DocumentId, session?: ClientSession): Promise<IRole
 };
 
 /**
+ * Retrieves a role by its name.
+ *
+ * @param name - The name of the role to retrieve
+ * @param session - Optional mongoose session for transactional operations
+ * @returns The role document if found, otherwise null
+ */
+
+const queryByName = async (name: string, session?: ClientSession): Promise<IRoleDoc | null> => {
+  return Role.findOne({ name }).session(session || null);
+};
+
+/**
  * Partially update a role
  * @param roleId - The ID of the role to update
  * @param updateBody - The partial role body
@@ -146,6 +158,7 @@ export const roleService = {
   create,
   query,
   updateById,
+  queryByName,
   replaceById,
   queryById,
   removeById,

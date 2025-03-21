@@ -3,6 +3,7 @@ import util from 'util';
 import config from './config/config';
 import SafeMongooseConnection from './modules/db-connection';
 import { logger } from './modules/logger';
+import { seedSuperAdmin } from './modules/seed/super-admin.seed';
 
 const PORT = config.port || 4000;
 
@@ -35,9 +36,15 @@ const safeMongooseConnection = new SafeMongooseConnection({
 });
 
 const serve = () =>
-  app.listen(PORT, () => {
+  app.listen(PORT, async () => {
     logger.info(`EXPRESS server started at http://localhost:${PORT}`);
 
+    try {
+      await seedSuperAdmin();
+    } catch (error) {
+      logger.error('Seeding error:', error);
+      // Don't throw, just log and continue running the server
+    }
     if (config.env === 'development') {
       // This route is only present in development mode
       logger.info(`SWAGGER UI hosted at http://localhost:${PORT}/dev/api-docs`);

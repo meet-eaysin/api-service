@@ -54,7 +54,7 @@ export const defaultIRoute: IRoute[] = [
     allowedMethods: ['POST', 'GET', 'POST', 'PUT', 'DELETE'],
   },
   {
-    path: '/rolePermissions',
+    path: '/role-permissions',
     route: rolePermissionRoute,
     resourceName: 'role-permission',
     allowedMethods: ['POST', 'GET', 'POST', 'PUT', 'DELETE'],

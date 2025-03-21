@@ -19,13 +19,17 @@ export const seedSuperAdmin = async () => {
 
   try {
     // 1. Create Super Admin Role
-    const superAdminRole = await roleService.create(
-      {
-        name: 'Super Admin',
-        description: 'Has full access to all system resources',
-      },
-      session,
-    );
+    let superAdminRole = await roleService.queryByName('Super Admin', session);
+
+    if (!superAdminRole) {
+      superAdminRole = await roleService.create(
+        {
+          name: 'Super Admin',
+          description: 'Has full access to all system resources',
+        },
+        session,
+      );
+    }
 
     // 2. Create Permissions for all resources
     const resources = resourceService.getResources();
