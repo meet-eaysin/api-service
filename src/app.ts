@@ -50,7 +50,7 @@ if (config.env === 'production') {
   app.use('/v1/auth', authLimiter);
 }
 
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, '..', '../public')));
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });

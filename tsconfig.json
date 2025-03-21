@@ -36,5 +36,7 @@
     "allowUnusedLabels": true,
     "allowUnreachableCode": true,
     "skipLibCheck": true
-  }
+  },
+  "include": ["src/**/*", "public/**/*"],
+  "exclude": ["node_modules", "**/*.test.ts", "**/*.spec.ts"]
 }
