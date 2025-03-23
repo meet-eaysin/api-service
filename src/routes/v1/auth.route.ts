@@ -11,6 +11,7 @@ authRoute.post('/forgot-password', authController.forgotPassword);
 authRoute.post('/reset-password', authController.resetPassword);
 authRoute.post('/send-verification-email', authenticateAndAuthorize(), authController.sendVerificationEmail);
 authRoute.post('/verify-email', authController.verifyEmail);
+authRoute.get('/me', authenticateAndAuthorize(), authController.me);
 
 export default authRoute;
 

@@ -4,6 +4,7 @@ import httpStatus from 'http-status';
 import { emailService } from '../email';
 import { tokenService } from '../token';
 import { userService } from '../user';
+import { IUserDoc } from '../user/user.interfaces';
 import catchAsync from '../utils/catchAsync';
 import { authService } from './auth.service';
 import {
@@ -102,6 +103,16 @@ const verifyEmailHandler = catchAsync(async (req: Request, res: Response) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+/**
+ * @desc Get current user's information
+ * @route GET /auth/me
+ * @access Private
+ */
+const meHandler = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user as IUserDoc;
+  res.send(user);
+});
+
 // Middleware-wrapped controller methods with validation
 export const register = requestMiddleware(registerHandler, { validation: { body: registerBodySchema } });
 export const login = requestMiddleware(loginHandler, { validation: { body: loginBodySchema } });
@@ -119,3 +130,4 @@ export const sendVerificationEmail = requestMiddleware(sendVerificationEmailHand
 export const verifyEmail = requestMiddleware(verifyEmailHandler, {
   validation: { query: verifyEmailQuerySchema },
 });
+export const me = requestMiddleware(meHandler);
