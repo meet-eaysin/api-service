@@ -1,20 +1,31 @@
-class ApiError extends Error {
+import { ApiErrorOptions, InvalidFields } from '../auth/auth.interface';
+
+export class ApiError extends Error {
   statusCode: number;
+  code: string;
+  invalidFields?: InvalidFields[];
+  data?: any;
+  [key: string]: any;
 
-  isOperational: boolean;
+  constructor(options: ApiErrorOptions) {
+    super(options.message);
 
-  override stack?: string;
+    this.name = 'ApplicationError';
+    this.statusCode = options.statusCode;
+    this.code = options.code;
+    this.invalidFields = options.invalidFields || [];
+    this.data = options.data;
 
-  constructor(statusCode: number, message: string, isOperational = true, stack = '') {
-    super(message);
-    this.statusCode = statusCode;
-    this.isOperational = isOperational;
-    if (stack) {
-      this.stack = stack;
-    } else {
+    // Capture stack trace
+    if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
     }
+
+    // Assign additional properties
+    Object.entries(options).forEach(([key, value]) => {
+      if (!Object.prototype.hasOwnProperty.call(this, key)) {
+        this[key] = value;
+      }
+    });
   }
 }
-
-export default ApiError;

@@ -1,15 +1,13 @@
-/**
- * Role Controller - Handles CRUD operations for roles.
- */
-
 import { requestMiddleware } from '@/middleware/request-middleware';
 import catchAsync from '@/modules/utils/catchAsync';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import { ApiError } from '../errors';
+import { ErrorCode } from '../errors/error-codes';
 import { IOptions } from '../paginate/paginate';
 import { pick } from '../utils';
+import { sendResponse } from '../utils/send-response';
 import { querySchema } from '../validate/query';
 import { roleService } from './index';
 import { roleParamsSchema, roleSchema, RoleSchemaType, updateRoleSchema } from './role.validation';
@@ -20,7 +18,13 @@ import { roleParamsSchema, roleSchema, RoleSchemaType, updateRoleSchema } from '
  */
 const createHandler = catchAsync(async (req: Request<{}, {}, RoleSchemaType>, res: Response) => {
   const role = await roleService.create(req.body);
-  res.status(httpStatus.CREATED).send(role);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.CREATED,
+    message: 'Role created successfully',
+    data: role,
+  });
 });
 
 /**
@@ -31,7 +35,13 @@ const queryHandler = catchAsync(async (req: Request, res: Response) => {
   const filter = pick(req.query, ['name', 'description']);
   const options: IOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
   const result = await roleService.query(filter, options);
-  res.send(result);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Roles retrieved successfully',
+    data: result,
+  });
 });
 
 /**
@@ -39,9 +49,23 @@ const queryHandler = catchAsync(async (req: Request, res: Response) => {
  * @route GET /roles/:roleId
  */
 const queryByIdHandler = catchAsync(async (req: Request<{ roleId: string }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.roleId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid role ID',
+    });
+  }
+
   const roleId = new mongoose.Types.ObjectId(req.params.roleId);
   const role = await roleService.queryById(roleId);
-  res.send(role);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Role retrieved successfully',
+    data: role,
+  });
 });
 
 /**
@@ -49,9 +73,23 @@ const queryByIdHandler = catchAsync(async (req: Request<{ roleId: string }>, res
  * @route PATCH /roles/:roleId
  */
 const partialUpdateHandler = catchAsync(async (req: Request<{ roleId: string }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.roleId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid role ID',
+    });
+  }
+
   const roleId = new mongoose.Types.ObjectId(req.params.roleId);
   const role = await roleService.updateById(roleId, req.body);
-  res.send(role);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Role updated successfully',
+    data: role,
+  });
 });
 
 /**
@@ -59,14 +97,33 @@ const partialUpdateHandler = catchAsync(async (req: Request<{ roleId: string }>,
  * @route PUT /roles/:roleId
  */
 const upsertHandler = catchAsync(async (req: Request<{ roleId: string }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.roleId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid role ID',
+    });
+  }
+
   const roleId = new mongoose.Types.ObjectId(req.params.roleId);
+
   try {
     const updatedRole = await roleService.replaceById(roleId, req.body);
-    res.send(updatedRole);
+    sendResponse({
+      res,
+      statusCode: httpStatus.OK,
+      message: 'Role updated successfully',
+      data: updatedRole,
+    });
   } catch (error) {
     if (error instanceof ApiError && error.statusCode === httpStatus.NOT_FOUND) {
       const newRole = await roleService.create(req.body);
-      res.status(httpStatus.CREATED).send(newRole);
+      sendResponse({
+        res,
+        statusCode: httpStatus.CREATED,
+        message: 'Role created successfully',
+        data: newRole,
+      });
     } else {
       throw error;
     }
@@ -78,9 +135,22 @@ const upsertHandler = catchAsync(async (req: Request<{ roleId: string }>, res: R
  * @route DELETE /roles/:roleId
  */
 const removeByIdHandler = catchAsync(async (req: Request<{ roleId: string }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.roleId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid role ID',
+    });
+  }
+
   const roleId = new mongoose.Types.ObjectId(req.params.roleId);
   await roleService.removeById(roleId);
-  res.status(httpStatus.NO_CONTENT).send();
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Role deleted successfully',
+  });
 });
 
 // Middleware-wrapped controller methods with validation

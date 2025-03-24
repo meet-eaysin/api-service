@@ -9,7 +9,7 @@ import request from 'supertest';
 import { authenticateAndAuthorize } from '.';
 import app from '../../app';
 import config from '../../config/config';
-import ApiError from '../errors/ApiError';
+import { ApiError } from '../errors/ApiError';
 import setupTestDB from '../jest/setupTestDB';
 import Token from '../token/token.model';
 import * as tokenService from '../token/token.service';

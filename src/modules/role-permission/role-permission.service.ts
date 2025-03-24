@@ -40,7 +40,11 @@ export const create = async (payload: RolePermissionSchemaType, session?: Client
   const permissionId = new Types.ObjectId(payload.permission);
 
   if (await checkExists(roleId, permissionId, undefined, session)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Role-Permission combination already exists');
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: 'ROLE_PERMISSION_COMBINATION_ALREADY_EXISTS',
+      message: 'Role-Permission combination already exists',
+    });
   }
 
   const [assignment] = await RolePermission.create([payload], { session });
@@ -74,7 +78,12 @@ export const query = async (
 
 export const queryById = async (id: DocumentId, session?: ClientSession): Promise<IRolePermissionDoc> => {
   const assignment = await RolePermission.findById(id).session(session || null);
-  if (!assignment) throw new ApiError(httpStatus.NOT_FOUND, 'Role-Permission assignment not found');
+  if (!assignment)
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: 'NOT_FOUND',
+      message: 'Role-Permission assignment not found',
+    });
   return assignment;
 };
 
@@ -101,7 +110,11 @@ export const updateById = async (
     : (assignment.permission as Types.ObjectId);
 
   if (await checkExists(newRole, newPermission, id, session)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Role-Permission combination already exists');
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: 'ROLE_PERMISSION_COMBINATION_ALREADY_EXISTS',
+      message: 'Role-Permission combination already exists',
+    });
   }
 
   Object.assign(assignment, updateBody);
@@ -131,7 +144,11 @@ export const replaceById = async (
     const newPermissionId = new Types.ObjectId(replaceBody.permission);
 
     if (await checkExists(newRoleId, newPermissionId, id, session)) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Role-Permission combination already exists');
+      throw new ApiError({
+        statusCode: httpStatus.BAD_REQUEST,
+        code: 'ROLE_PERMISSION_COMBINATION_ALREADY_EXISTS',
+        message: 'Role-Permission combination already exists',
+      });
     }
 
     assignment.role = newRoleId;
@@ -157,7 +174,12 @@ export const replaceById = async (
  */
 export const removeById = async (id: DocumentId, session?: ClientSession): Promise<IRolePermissionDoc> => {
   const assignment = await RolePermission.findByIdAndDelete(id, { session: session || null });
-  if (!assignment) throw new ApiError(httpStatus.NOT_FOUND, 'Role-Permission assignment not found');
+  if (!assignment)
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: 'NOT_FOUND',
+      message: 'Role-Permission assignment not found',
+    });
   return assignment;
 };
 

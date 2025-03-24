@@ -1,5 +1,7 @@
 import config from '@/config/config';
-import { ApiError } from '@/modules/errors';
+import { InvalidFields } from '@/modules/auth/auth.interface';
+import { ApiError } from '@/modules/errors/ApiError';
+import { ErrorCode } from '@/modules/errors/error-codes';
 import { logger } from '@/modules/logger';
 import { pick } from '@/modules/utils';
 import { NextFunction, Request, RequestHandler, Response } from 'express';
@@ -21,7 +23,6 @@ export const requestMiddleware =
   ): RequestHandler<P, ResBody, ReqBody, ReqQuery> =>
   async (req: Request<P, ResBody, ReqBody, ReqQuery>, res, next) => {
     try {
-      // Extract and validate provided schemas
       if (options?.validation) {
         const validSchema = pick(options.validation, ['params', 'query', 'body']);
         const validationSchema = z.object(validSchema);
@@ -36,12 +37,36 @@ export const requestMiddleware =
       await handler(req, res, next);
     } catch (error) {
       if (error instanceof ZodError) {
-        const errorMessages = error.errors.map((err) => `${err.message} (${err.path.join('.')})`).join(', ');
-        return next(new ApiError(httpStatus.BAD_REQUEST, errorMessages));
+        const invalidFields: InvalidFields[] = error.errors.map((err) => ({
+          field: err.path.join('.'),
+          messages: err.message,
+        }));
+
+        return next(
+          new ApiError({
+            statusCode: httpStatus.BAD_REQUEST,
+            code: ErrorCode.VALIDATION_ERROR,
+            message: 'Validation failed',
+            invalidFields,
+            data: {
+              receivedValues: {
+                body: req.body,
+                query: req.query,
+                params: req.params,
+              },
+            },
+          }),
+        );
       }
 
       if (config?.env === 'development') {
-        logger.error('Error in request handler', { error });
+        logger.error('Request handler error', {
+          error,
+          url: req.originalUrl,
+          method: req.method,
+          body: req.body,
+          params: req.params,
+        });
       }
 
       next(error);

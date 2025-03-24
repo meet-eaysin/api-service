@@ -31,7 +31,11 @@ const checkNameTaken = async (name: string, excludeId?: DocumentId, session?: Cl
 
 const create = async (roleBody: RoleSchemaType, session?: ClientSession): Promise<IRoleDoc> => {
   if (await checkNameTaken(roleBody.name)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Role name already taken');
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: 'ROLE_NAME_ALREADY_TAKEN',
+      message: 'Role name already taken',
+    });
   }
 
   const result = await Role.create([roleBody], { session });
@@ -66,7 +70,12 @@ const query = async (
 
 const queryById = async (id: DocumentId, session?: ClientSession): Promise<IRoleDoc> => {
   const role = await Role.findById(id).session(session || null);
-  if (!role) throw new ApiError(httpStatus.NOT_FOUND, 'Role not found');
+  if (!role)
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: 'NOT_FOUND',
+      message: 'Role not found',
+    });
   return role;
 };
 
@@ -99,7 +108,11 @@ const updateById = async (
 
   if (updateBody.name && updateBody.name !== role.name) {
     if (await checkNameTaken(updateBody.name, roleId, session)) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Role name already taken');
+      throw new ApiError({
+        statusCode: httpStatus.BAD_REQUEST,
+        code: 'ROLE_NAME_ALREADY_TAKEN',
+        message: 'Role name already taken',
+      });
     }
     role.name = updateBody.name;
   }
@@ -123,7 +136,11 @@ const updateById = async (
 const replaceById = async (roleId: DocumentId, replaceBody: RoleSchemaType, session?: ClientSession): Promise<IRoleDoc> => {
   // Check if new name is already taken by another role
   if (await checkNameTaken(replaceBody.name, roleId, session)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Role name already taken');
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: 'ROLE_NAME_ALREADY_TAKEN',
+      message: 'Role name already taken',
+    });
   }
 
   // Get existing role and completely replace its properties
@@ -150,7 +167,12 @@ const replaceById = async (roleId: DocumentId, replaceBody: RoleSchemaType, sess
  */
 const removeById = async (roleId: DocumentId, session?: ClientSession): Promise<IRoleDoc> => {
   const role = await Role.findByIdAndDelete(roleId, { session: session || null });
-  if (!role) throw new ApiError(httpStatus.NOT_FOUND, 'Role not found');
+  if (!role)
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: 'NOT_FOUND',
+      message: 'Role not found',
+    });
   return role;
 };
 

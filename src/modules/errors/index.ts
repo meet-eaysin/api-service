@@ -1,4 +1,4 @@
-import ApiError from './ApiError';
+import { ApiError } from '@/modules/errors/ApiError';
 import { errorConverter, errorHandler } from './error';
 
-export { ApiError, errorHandler, errorConverter };
+export { ApiError, errorConverter, errorHandler };

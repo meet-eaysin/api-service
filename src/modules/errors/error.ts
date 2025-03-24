@@ -1,39 +1,43 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
-import mongoose from 'mongoose';
-import config from '../../config/config';
-import { logger } from '../logger';
-import ApiError from './ApiError';
+import { sendResponse } from '../utils/send-response';
+import { ApiError } from './ApiError';
+import { ErrorCode } from './error-codes';
 
 export const errorConverter = (err: any, _req: Request, _res: Response, next: NextFunction) => {
   let error = err;
+
   if (!(error instanceof ApiError)) {
-    const statusCode =
-      error.statusCode || error instanceof mongoose.Error ? httpStatus.BAD_REQUEST : httpStatus.INTERNAL_SERVER_ERROR;
-    const message: string = error.message || `${httpStatus[statusCode]}`;
-    error = new ApiError(statusCode, message, false, err.stack);
+    const statusCode = error.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
+    const message = error.message || httpStatus[statusCode as keyof typeof httpStatus];
+    const code = error.code || ErrorCode.INTERNAL_SERVER_ERROR;
+
+    error = new ApiError({
+      statusCode,
+      code,
+      message,
+      invalidFields: error.invalidFields,
+      data: error.data,
+      ...error,
+    });
   }
+
   next(error);
 };
 
 export const errorHandler = (err: ApiError, _req: Request, res: Response, _next: NextFunction) => {
-  let { statusCode, message } = err;
-  if (config.env === 'production' && !err.isOperational) {
-    statusCode = httpStatus.INTERNAL_SERVER_ERROR;
-    message = 'Internal Server Error';
-  }
+  const { statusCode, code, message, invalidFields, data, ...rest } = err;
 
-  res.locals['errorMessage'] = err.message;
-
-  const response = {
-    code: statusCode,
+  sendResponse({
+    res,
+    statusCode,
     message,
-    ...(config.env === 'development' && { stack: err.stack }),
-  };
-
-  if (config.env === 'development') {
-    logger.error(err);
-  }
-
-  res.status(statusCode).send(response);
+    error: {
+      code,
+      message,
+      ...(invalidFields && { invalidFields }),
+      ...(data && { data }),
+      ...rest,
+    },
+  });
 };

@@ -3,7 +3,8 @@ import jwt from 'jsonwebtoken';
 import moment, { Moment } from 'moment';
 import mongoose from 'mongoose';
 import config from '../../config/config';
-import ApiError from '../errors/ApiError';
+import { ApiError } from '../errors';
+import { ErrorCode } from '../errors/error-codes';
 import { userService } from '../user';
 import { IUserDoc } from '../user/user.interfaces';
 import { DocumentId } from '../validate/id';
@@ -69,7 +70,11 @@ export const saveToken = async (
 export const verifyToken = async (token: string, type: string): Promise<ITokenDoc> => {
   const payload = jwt.verify(token, config.jwt.secret);
   if (typeof payload.sub !== 'string') {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'bad user');
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: 'INVALID_JWT_TOKEN',
+      message: 'Invalid JWT token',
+    });
   }
   const tokenDoc = await Token.findOne({
     token,
@@ -116,7 +121,11 @@ export const generateAuthTokens = async (user: IUserDoc): Promise<AccessAndRefre
 export const generateResetPasswordToken = async (email: string): Promise<string> => {
   const user = await userService.getByEmail(email);
   if (!user) {
-    throw new ApiError(httpStatus.NO_CONTENT, '');
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: ErrorCode.USER_NOT_FOUND,
+      message: 'User not found',
+    });
   }
   const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
   const resetPasswordToken = generateToken(user.id, expires, tokenTypes.RESET_PASSWORD);

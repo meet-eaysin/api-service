@@ -10,6 +10,7 @@ import xss from 'xss-clean';
 import config from './config/config';
 import { jwtStrategy } from './modules/auth';
 import { ApiError, errorConverter, errorHandler } from './modules/errors';
+import { ErrorCode } from './modules/errors/error-codes';
 import { morgan } from './modules/logger';
 import { authLimiter } from './modules/utils';
 import routes from './routes/v1';
@@ -64,7 +65,13 @@ app.get('/health', (_req, res) => {
 
 // send back a 404 error for any unknown api request
 app.use((_req, _res, next) => {
-  next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
+  next(
+    new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: ErrorCode.NOT_FOUND,
+      message: 'Not Found',
+    }),
+  );
 });
 
 // convert error to ApiError, if needed

@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { AnyZodObject, z, ZodError } from 'zod';
-import ApiError from '../errors/ApiError';
+import { ApiError } from '../errors';
+import { ErrorCode } from '../errors/error-codes';
 import pick from '../utils/pick';
 
 const validate =
@@ -25,7 +26,13 @@ const validate =
             return `${err.message}${field ? ` (${field})` : ''}`;
           })
           .join(', ');
-        next(new ApiError(httpStatus.BAD_REQUEST, errorMessages));
+        next(
+          new ApiError({
+            statusCode: httpStatus.BAD_REQUEST,
+            code: ErrorCode.VALIDATION_ERROR,
+            message: errorMessages,
+          }),
+        );
       } else {
         next(error);
       }

@@ -1,10 +1,12 @@
 import { requestMiddleware } from '@/middleware/request-middleware';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
-import ApiError from '../errors/ApiError';
+import mongoose from 'mongoose';
+import { ApiError } from '../errors';
+import { ErrorCode } from '../errors/error-codes';
 import { IOptions } from '../paginate/paginate';
-import catchAsync from '../utils/catchAsync';
-import pick from '../utils/pick';
+import { pick } from '../utils';
+import { sendResponse } from '../utils/send-response';
 import { DocumentId } from '../validate/id';
 import { querySchema } from '../validate/query';
 import { userService } from './user.service';
@@ -14,78 +16,133 @@ import { queryByEmployeeIdSchema, userParamsSchema, userSchema } from './user.va
  * @desc    Create a new user
  * @route   POST /api/users
  * @access  Private/Admin
- * @body    {name, email, password, role}
  */
-const createHandler = catchAsync(async (req: Request, res: Response) => {
+const createHandler = async (req: Request, res: Response) => {
   const user = await userService.create(req.body);
-  res.status(httpStatus.CREATED).send(user);
-});
+  sendResponse({
+    res,
+    statusCode: httpStatus.CREATED,
+    message: 'User created successfully',
+    data: user,
+  });
+};
 
 /**
  * @desc    Get all users with pagination
  * @route   GET /api/users
  * @access  Private/Admin
- * @query   {name?, role?, sortBy?, limit?, page?, projectBy?}
  */
-const queryHandler = catchAsync(async (req: Request, res: Response) => {
+const queryHandler = async (req: Request, res: Response) => {
   const filter = pick(req.query, ['name', 'role', 'status', 'createdAt', 'updatedAt']);
   const options: IOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
-
   const result = await userService.query(filter, options);
-  res.send(result);
-});
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Users retrieved successfully',
+    data: result,
+  });
+};
 
 /**
  * @desc    Get single user by ID
  * @route   GET /api/users/:userId
  * @access  Private/Admin
- * @param   {string} userId - MongoDB ObjectId
  */
-const queryByIdHandler = catchAsync(async (req: Request<{ userId: DocumentId }>, res: Response) => {
-  if (typeof req.params.userId === 'string') {
-    const userId = req.params.userId;
+const queryByIdHandler = async (req: Request<{ userId: DocumentId }>, res: Response) => {
+  const userId = req.params.userId;
 
-    const user = await userService.queryById(userId);
-    if (!user) throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-
-    res.send(user);
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid user ID',
+    });
   }
-});
+
+  const user = await userService.queryById(userId);
+  if (!user) {
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: ErrorCode.USER_NOT_FOUND,
+      message: 'User not found',
+    });
+  }
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'User retrieved successfully',
+    data: user,
+  });
+};
 
 /**
  * @desc    Update user details
  * @route   PATCH /api/users/:userId
  * @access  Private/Admin
- * @param   {string} userId - MongoDB ObjectId
- * @body    {name?, email?, role?}
  */
-const updateHandler = catchAsync(async (req: Request<{ userId: DocumentId }>, res: Response) => {
-  if (typeof req.params['userId'] === 'string') {
-    const userId = req.params.userId;
-    const user = await userService.updateById(userId, req.body);
-    res.send(user);
+const updateHandler = async (req: Request<{ userId: DocumentId }>, res: Response) => {
+  const userId = req.params.userId;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid user ID',
+    });
   }
-});
+
+  const user = await userService.updateById(userId, req.body);
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'User updated successfully',
+    data: user,
+  });
+};
 
 /**
  * @desc    Delete a user
  * @route   DELETE /api/users/:userId
  * @access  Private/Admin
- * @param   {string} userId - MongoDB ObjectId
  */
-const removeByIdHandler = catchAsync(async (req: Request<{ userId: DocumentId }>, res: Response) => {
-  if (typeof req.params['userId'] === 'string') {
-    const userId = req.params.userId;
-    await userService.removeById(userId);
-    res.status(httpStatus.NO_CONTENT).send();
-  }
-});
+const removeByIdHandler = async (req: Request<{ userId: DocumentId }>, res: Response) => {
+  const userId = req.params.userId;
 
-const queryByEmployeeIdHandler = catchAsync(async (req: Request<{ employeeId: DocumentId }>, res: Response) => {
-  const employeeId = req.query['employeeId'] as DocumentId | undefined;
-  const users = await userService.getByEmployeeId(employeeId || null);
-  res.status(httpStatus.OK).json({ users });
-});
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid user ID',
+    });
+  }
+
+  await userService.removeById(userId);
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'User deleted successfully',
+  });
+};
+
+/**
+ * @desc    Get users by employee ID
+ * @route   GET /api/users/by-employee
+ * @access  Private/Admin
+ */
+const queryByEmployeeIdHandler = async (req: Request<{}, {}, {}, { employeeId: string }>, res: Response) => {
+  const employeeId = req.query.employeeId;
+  const users = await userService.getByEmployeeId(employeeId);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Users retrieved successfully',
+    data: { users },
+  });
+};
 
 // Middleware-wrapped controller methods with validation
 export const create = requestMiddleware(createHandler, { validation: { body: userSchema } });
@@ -96,10 +153,9 @@ export const update = requestMiddleware(updateHandler, {
 });
 export const removeById = requestMiddleware(removeByIdHandler, { validation: { params: userParamsSchema } });
 export const queryByEmployeeId = requestMiddleware(queryByEmployeeIdHandler, {
-  validation: { params: queryByEmployeeIdSchema },
+  validation: { query: queryByEmployeeIdSchema },
 });
 
-// Export controller object
 export const userController = {
   create,
   query,

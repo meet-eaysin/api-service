@@ -6,6 +6,7 @@ import { tokenService } from '../token';
 import { userService } from '../user';
 import { IUserDoc } from '../user/user.interfaces';
 import catchAsync from '../utils/catchAsync';
+import { sendResponse } from '../utils/send-response';
 import { authService } from './auth.service';
 import {
   forgotPasswordBodySchema,
@@ -26,7 +27,13 @@ import {
 const registerHandler = catchAsync(async (req: Request, res: Response) => {
   const user = await userService.register(req.body);
   const tokens = await tokenService.generateAuthTokens(user);
-  res.status(httpStatus.CREATED).send({ user, tokens });
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.CREATED,
+    message: 'User registered successfully',
+    data: { user, tokens },
+  });
 });
 
 /**
@@ -38,7 +45,13 @@ const loginHandler = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await authService.loginUserWithEmailAndPassword(email, password);
   const tokens = await tokenService.generateAuthTokens(user);
-  res.send({ user, tokens });
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Login successful',
+    data: { user, tokens },
+  });
 });
 
 /**
@@ -48,7 +61,12 @@ const loginHandler = catchAsync(async (req: Request, res: Response) => {
  */
 const logoutHandler = catchAsync(async (req: Request, res: Response) => {
   await authService.logout(req.body.refreshToken);
-  res.status(httpStatus.NO_CONTENT).send();
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Logged out successfully',
+  });
 });
 
 /**
@@ -58,7 +76,13 @@ const logoutHandler = catchAsync(async (req: Request, res: Response) => {
  */
 const refreshTokensHandler = catchAsync(async (req: Request, res: Response) => {
   const userWithTokens = await authService.refreshAuth(req.body.refreshToken);
-  res.send(userWithTokens);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Tokens refreshed successfully',
+    data: userWithTokens,
+  });
 });
 
 /**
@@ -69,7 +93,12 @@ const refreshTokensHandler = catchAsync(async (req: Request, res: Response) => {
 const forgotPasswordHandler = catchAsync(async (req: Request, res: Response) => {
   const resetPasswordToken = await tokenService.generateResetPasswordToken(req.body.email);
   await emailService.sendResetPasswordEmail(req.body.email, resetPasswordToken);
-  res.status(httpStatus.NO_CONTENT).send();
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Password reset email sent successfully',
+  });
 });
 
 /**
@@ -79,7 +108,12 @@ const forgotPasswordHandler = catchAsync(async (req: Request, res: Response) => 
  */
 const resetPasswordHandler = catchAsync(async (req: Request, res: Response) => {
   await authService.resetPassword(req.query['token'] as string, req.body.password);
-  res.status(httpStatus.NO_CONTENT).send();
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Password reset successful',
+  });
 });
 
 /**
@@ -90,7 +124,12 @@ const resetPasswordHandler = catchAsync(async (req: Request, res: Response) => {
 const sendVerificationEmailHandler = catchAsync(async (req: Request, res: Response) => {
   const verifyEmailToken = await tokenService.generateVerifyEmailToken(req.user);
   await emailService.sendVerificationEmail(req.user.email, verifyEmailToken, req.user.name);
-  res.status(httpStatus.NO_CONTENT).send();
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Verification email sent successfully',
+  });
 });
 
 /**
@@ -100,7 +139,12 @@ const sendVerificationEmailHandler = catchAsync(async (req: Request, res: Respon
  */
 const verifyEmailHandler = catchAsync(async (req: Request, res: Response) => {
   await authService.verifyEmail(req.query['token'] as string);
-  res.status(httpStatus.NO_CONTENT).send();
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Email verified successfully',
+  });
 });
 
 /**
@@ -110,7 +154,13 @@ const verifyEmailHandler = catchAsync(async (req: Request, res: Response) => {
  */
 const meHandler = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as IUserDoc;
-  res.send(user);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'User profile retrieved successfully',
+    data: user,
+  });
 });
 
 // Middleware-wrapped controller methods with validation

@@ -2,9 +2,12 @@ import { requestMiddleware } from '@/middleware/request-middleware';
 import catchAsync from '@/modules/utils/catchAsync';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
+import mongoose from 'mongoose';
 import { ApiError } from '../errors';
+import { ErrorCode } from '../errors/error-codes';
 import { IOptions } from '../paginate/paginate';
 import { pick } from '../utils';
+import { sendResponse } from '../utils/send-response';
 import { DocumentId } from '../validate/id';
 import { querySchema } from '../validate/query';
 import { rolePermissionService } from './index';
@@ -16,7 +19,13 @@ import { rolePermissionParamsSchema, rolePermissionSchema, updateRolePermissionS
  */
 const createHandler = catchAsync(async (req: Request, res: Response) => {
   const rolePermission = await rolePermissionService.create(req.body);
-  res.status(httpStatus.CREATED).send(rolePermission);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.CREATED,
+    message: 'Role permission created successfully',
+    data: rolePermission,
+  });
 });
 
 /**
@@ -27,7 +36,13 @@ const queryHandler = catchAsync(async (req: Request, res: Response) => {
   const filter = pick(req.query, ['role', 'permission']);
   const options: IOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
   const result = await rolePermissionService.query(filter, options);
-  res.send(result);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Role permissions retrieved successfully',
+    data: result,
+  });
 });
 
 /**
@@ -35,8 +50,22 @@ const queryHandler = catchAsync(async (req: Request, res: Response) => {
  * @route GET /role-permissions/:rolePermissionId
  */
 const queryByIdHandler = catchAsync(async (req: Request<{ rolePermissionId: DocumentId }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.rolePermissionId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid role permission ID',
+    });
+  }
+
   const rolePermission = await rolePermissionService.queryById(req.params.rolePermissionId);
-  res.send(rolePermission);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Role permission retrieved successfully',
+    data: rolePermission,
+  });
 });
 
 /**
@@ -44,8 +73,22 @@ const queryByIdHandler = catchAsync(async (req: Request<{ rolePermissionId: Docu
  * @route PATCH /role-permissions/:rolePermissionId
  */
 const partialUpdateHandler = catchAsync(async (req: Request<{ rolePermissionId: DocumentId }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.rolePermissionId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid role permission ID',
+    });
+  }
+
   const rolePermission = await rolePermissionService.updateById(req.params.rolePermissionId, req.body);
-  res.send(rolePermission);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Role permission updated successfully',
+    data: rolePermission,
+  });
 });
 
 /**
@@ -53,13 +96,31 @@ const partialUpdateHandler = catchAsync(async (req: Request<{ rolePermissionId: 
  * @route PUT /role-permissions/:rolePermissionId
  */
 const upsertHandler = catchAsync(async (req: Request<{ rolePermissionId: DocumentId }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.rolePermissionId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid role permission ID',
+    });
+  }
+
   try {
     const updatedRolePermission = await rolePermissionService.replaceById(req.params.rolePermissionId, req.body);
-    res.send(updatedRolePermission);
+    sendResponse({
+      res,
+      statusCode: httpStatus.OK,
+      message: 'Role permission updated successfully',
+      data: updatedRolePermission,
+    });
   } catch (error) {
     if (error instanceof ApiError && error.statusCode === httpStatus.NOT_FOUND) {
       const newRolePermission = await rolePermissionService.create(req.body);
-      res.status(httpStatus.CREATED).send(newRolePermission);
+      sendResponse({
+        res,
+        statusCode: httpStatus.CREATED,
+        message: 'Role permission created successfully',
+        data: newRolePermission,
+      });
     } else {
       throw error;
     }
@@ -71,8 +132,21 @@ const upsertHandler = catchAsync(async (req: Request<{ rolePermissionId: Documen
  * @route DELETE /role-permissions/:rolePermissionId
  */
 const removeByIdHandler = catchAsync(async (req: Request<{ rolePermissionId: DocumentId }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.rolePermissionId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid role permission ID',
+    });
+  }
+
   await rolePermissionService.removeById(req.params.rolePermissionId);
-  res.status(httpStatus.NO_CONTENT).send();
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Role permission deleted successfully',
+  });
 });
 
 // Middleware-wrapped controller methods with validation
@@ -85,7 +159,7 @@ export const partialUpdate = requestMiddleware(partialUpdateHandler, {
   validation: { params: rolePermissionParamsSchema, body: updateRolePermissionSchema },
 });
 export const upsert = requestMiddleware(upsertHandler, {
-  validation: { params: rolePermissionParamsSchema, body: updateRolePermissionSchema },
+  validation: { params: rolePermissionParamsSchema, body: rolePermissionSchema },
 });
 export const removeById = requestMiddleware(removeByIdHandler, {
   validation: { params: rolePermissionParamsSchema },

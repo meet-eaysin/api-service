@@ -52,7 +52,11 @@ export const query = async (
 
 export const create = async (body: CreatePermissionBody, session?: ClientSession): Promise<IPermissionDoc> => {
   if (await checkExists(body.resource, undefined, session)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Resource already exists');
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: 'RESOURCE_ALREADY_EXISTS',
+      message: 'Resource already exists',
+    });
   }
   const [permission] = await Permission.create([body], { session });
   return permission as unknown as IPermissionDoc;
@@ -69,7 +73,12 @@ export const create = async (body: CreatePermissionBody, session?: ClientSession
 
 export const queryById = async (id: DocumentId, session?: ClientSession): Promise<IPermissionDoc> => {
   const permission = await Permission.findById(id).session(session || null);
-  if (!permission) throw new ApiError(httpStatus.NOT_FOUND, 'Permission not found');
+  if (!permission)
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: 'NOT_FOUND',
+      message: 'Permission not found',
+    });
   return permission;
 };
 
@@ -92,7 +101,11 @@ export const replacePermission = async (
 
   if (updateBody.resource !== permission.resource) {
     if (await checkExists(updateBody.resource, id, session)) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Resource name already taken');
+      throw new ApiError({
+        statusCode: httpStatus.BAD_REQUEST,
+        code: 'RESOURCE_ALREADY_EXISTS',
+        message: 'Resource already exists',
+      });
     }
     permission.resource = updateBody.resource;
   }
@@ -120,7 +133,11 @@ export const updateById = async (
 
   if (updateBody.resource && updateBody.resource !== permission.resource) {
     if (await checkExists(updateBody.resource, id, session)) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Resource name already taken');
+      throw new ApiError({
+        statusCode: httpStatus.BAD_REQUEST,
+        code: 'RESOURCE_ALREADY_EXISTS',
+        message: 'Resource already exists',
+      });
     }
     permission.resource = updateBody.resource;
   }
@@ -143,7 +160,12 @@ export const updateById = async (
  */
 export const removeById = async (id: DocumentId, session?: ClientSession): Promise<IPermissionDoc> => {
   const permission = await Permission.findByIdAndDelete(id, { session: session || null });
-  if (!permission) throw new ApiError(httpStatus.NOT_FOUND, 'Permission not found');
+  if (!permission)
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: 'NOT_FOUND',
+      message: 'Permission not found',
+    });
   return permission;
 };
 

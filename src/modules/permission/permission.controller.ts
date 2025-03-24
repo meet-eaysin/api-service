@@ -4,9 +4,11 @@ import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import { ApiError } from '../errors';
+import { ErrorCode } from '../errors/error-codes';
 import { IOptions } from '../paginate/paginate';
 import { permissionParamsSchema, updatePermissionBody } from '../permission/permission.validation';
 import { pick } from '../utils';
+import { sendResponse } from '../utils/send-response';
 import { querySchema } from '../validate/query';
 import { permissionService } from './permission.service';
 import { addActionBody, createPermissionBody, CreatePermissionBody, removeActionBody } from './permission.validation';
@@ -18,7 +20,13 @@ import { addActionBody, createPermissionBody, CreatePermissionBody, removeAction
  */
 const createHandler = catchAsync(async (req: Request<{}, {}, CreatePermissionBody>, res: Response) => {
   const permission = await permissionService.create(req.body);
-  res.status(httpStatus.CREATED).send(permission);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.CREATED,
+    message: 'Permission created successfully',
+    data: permission,
+  });
 });
 
 /**
@@ -30,7 +38,13 @@ const queryHandler = catchAsync(async (req: Request, res: Response) => {
   const filter = pick(req.query, ['resource', 'action']);
   const options: IOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
   const result = await permissionService.query(filter, options);
-  res.send(result);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Permissions retrieved successfully',
+    data: result,
+  });
 });
 
 /**
@@ -39,9 +53,23 @@ const queryHandler = catchAsync(async (req: Request, res: Response) => {
  * @access  Private/Admin
  */
 const queryByIdHandler = catchAsync(async (req: Request<{ permissionId: string }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.permissionId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid permission ID',
+    });
+  }
+
   const permissionId = new mongoose.Types.ObjectId(req.params.permissionId);
   const permission = await permissionService.queryById(permissionId);
-  res.send(permission);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Permission retrieved successfully',
+    data: permission,
+  });
 });
 
 /**
@@ -50,9 +78,23 @@ const queryByIdHandler = catchAsync(async (req: Request<{ permissionId: string }
  * @access  Private/Admin
  */
 const partialUpdateHandler = catchAsync(async (req: Request<{ permissionId: string }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.permissionId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid permission ID',
+    });
+  }
+
   const permissionId = new mongoose.Types.ObjectId(req.params.permissionId);
   const permission = await permissionService.updateById(permissionId, req.body);
-  res.send(permission);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Permission updated successfully',
+    data: permission,
+  });
 });
 
 /**
@@ -61,9 +103,23 @@ const partialUpdateHandler = catchAsync(async (req: Request<{ permissionId: stri
  * @access  Private/Admin
  */
 const addActionHandler = catchAsync(async (req: Request<{ permissionId: string }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.permissionId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid permission ID',
+    });
+  }
+
   const permissionId = new mongoose.Types.ObjectId(req.params.permissionId);
   const permission = await permissionService.addAction(permissionId, req.body.actions);
-  res.status(httpStatus.OK).send(permission);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Actions added successfully',
+    data: permission,
+  });
 });
 
 /**
@@ -72,9 +128,23 @@ const addActionHandler = catchAsync(async (req: Request<{ permissionId: string }
  * @access  Private/Admin
  */
 const removeActionHandler = catchAsync(async (req: Request<{ permissionId: string }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.permissionId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid permission ID',
+    });
+  }
+
   const permissionId = new mongoose.Types.ObjectId(req.params.permissionId);
   const permission = await permissionService.removeAction(permissionId, req.body.actions);
-  res.status(httpStatus.OK).send(permission);
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Actions removed successfully',
+    data: permission,
+  });
 });
 
 /**
@@ -83,14 +153,33 @@ const removeActionHandler = catchAsync(async (req: Request<{ permissionId: strin
  * @access  Private/Admin
  */
 const upsertHandler = catchAsync(async (req: Request<{ permissionId: string }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.permissionId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid permission ID',
+    });
+  }
+
   const permissionId = new mongoose.Types.ObjectId(req.params.permissionId);
+
   try {
     const updatedPermission = await permissionService.replaceById(permissionId, req.body);
-    res.send(updatedPermission);
+    sendResponse({
+      res,
+      statusCode: httpStatus.OK,
+      message: 'Permission updated successfully',
+      data: updatedPermission,
+    });
   } catch (error) {
     if (error instanceof ApiError && error.statusCode === httpStatus.NOT_FOUND) {
       const newPermission = await permissionService.create(req.body);
-      res.status(httpStatus.CREATED).send(newPermission);
+      sendResponse({
+        res,
+        statusCode: httpStatus.CREATED,
+        message: 'Permission created successfully',
+        data: newPermission,
+      });
     } else {
       throw error;
     }
@@ -103,12 +192,25 @@ const upsertHandler = catchAsync(async (req: Request<{ permissionId: string }>, 
  * @access  Private/Admin
  */
 const removeByIdHandler = catchAsync(async (req: Request<{ permissionId: string }>, res: Response) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.permissionId)) {
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.INVALID_ID,
+      message: 'Invalid permission ID',
+    });
+  }
+
   const permissionId = new mongoose.Types.ObjectId(req.params.permissionId);
   await permissionService.removeById(permissionId);
-  res.status(httpStatus.NO_CONTENT).send();
+
+  sendResponse({
+    res,
+    statusCode: httpStatus.OK,
+    message: 'Permission deleted successfully',
+  });
 });
 
-// Middleware-wrapped controller methods with validation
+// Middleware-wrapped exports remain unchanged
 export const create = requestMiddleware(createHandler, {
   validation: { body: createPermissionBody },
 });

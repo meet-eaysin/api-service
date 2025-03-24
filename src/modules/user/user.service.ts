@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import { ClientSession } from 'mongoose';
-import ApiError from '../errors/ApiError';
+import { ApiError } from '../errors';
+import { ErrorCode } from '../errors/error-codes';
 import { IOptions, QueryResult } from '../paginate/paginate';
 import { DocumentId } from '../validate/id';
 import { IUserDoc } from './user.interfaces';
@@ -15,7 +16,11 @@ import { UpdateUserSchemaType, UserSchemaType } from './user.validation';
  */
 const create = async (userBody: UserSchemaType, session?: ClientSession): Promise<IUserDoc> => {
   if (await User.isEmailTaken(userBody.email, undefined, session)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.EMAIL_ALREADY_TAKEN,
+      message: 'Email already taken',
+    });
   }
   const [user] = await User.create([userBody], { session });
   return user as IUserDoc;
@@ -29,7 +34,11 @@ const create = async (userBody: UserSchemaType, session?: ClientSession): Promis
  */
 const register = async (userBody: UserSchemaType, session?: ClientSession): Promise<IUserDoc> => {
   if (await User.isEmailTaken(userBody.email, undefined, session)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.EMAIL_ALREADY_TAKEN,
+      message: 'Email already taken',
+    });
   }
   const [user] = await User.create([userBody], { session });
   return user as IUserDoc;
@@ -86,11 +95,19 @@ const updateById = async (
 ): Promise<IUserDoc> => {
   const user = await queryById(userId, session);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: ErrorCode.NOT_FOUND,
+      message: 'User not found',
+    });
   }
 
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId, session))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    throw new ApiError({
+      statusCode: httpStatus.BAD_REQUEST,
+      code: ErrorCode.EMAIL_ALREADY_TAKEN,
+      message: 'Email already taken',
+    });
   }
 
   Object.assign(user, updateBody);
@@ -107,7 +124,11 @@ const updateById = async (
 const removeById = async (userId: DocumentId, session?: ClientSession): Promise<IUserDoc> => {
   const user = await User.findByIdAndDelete(userId, { session: session || null });
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: ErrorCode.NOT_FOUND,
+      message: 'User not found',
+    });
   }
   return user;
 };

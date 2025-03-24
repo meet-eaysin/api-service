@@ -78,7 +78,11 @@ export const seedSuperAdmin = async () => {
     console.error('❌ Super admin seeding failed:', error);
 
     if (error instanceof ApiError) throw error;
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Seeding failed');
+    throw new ApiError({
+      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Internal server error',
+    });
   } finally {
     session.endSession();
   }

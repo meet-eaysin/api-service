@@ -1,5 +1,6 @@
 import { ApiError } from '@/modules/errors';
 import httpStatus from 'http-status';
+import { ErrorCode } from '../errors/error-codes';
 import { IOptions } from '../paginate/paginate';
 import { DocumentId } from '../validate/id';
 import { IEmployeeDoc } from './employee.interface';
@@ -34,7 +35,13 @@ export const query = async (filter: Record<string, any>, options: IOptions) => {
  */
 export const queryById = async (id: DocumentId): Promise<IEmployeeDoc> => {
   const employee = await Employee.findById(id);
-  if (!employee) throw new ApiError(httpStatus.NOT_FOUND, 'Employee not found');
+  if (!employee) {
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: ErrorCode.EMPLOYEE_NOT_FOUND,
+      message: 'Employee not found',
+    });
+  }
   return employee;
 };
 
@@ -46,7 +53,14 @@ export const queryById = async (id: DocumentId): Promise<IEmployeeDoc> => {
  */
 export const queryByUserId = async (userId: DocumentId): Promise<IEmployeeDoc> => {
   const employee = await Employee.findOne({ user: userId });
-  if (!employee) throw new ApiError(httpStatus.NOT_FOUND, 'Employee not found for this user');
+  if (!employee) {
+    throw new ApiError({
+      statusCode: httpStatus.NOT_FOUND,
+      code: ErrorCode.EMPLOYEE_NOT_FOUND,
+      message: 'Employee not found for this user',
+    });
+  }
+
   return employee;
 };
 
