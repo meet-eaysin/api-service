@@ -1,29 +1,23 @@
-// permission.validation.ts
+import { PermissionAction } from '@/modules/permission';
+import { documentIdSchema } from '@/modules/validate';
 import { z } from 'zod';
-import { documentId } from '../validate';
-import { PermissionAction } from './permission.interface';
 
-export const createPermissionBody = z.object({
+export const permissionSchema = z.object({
   resource: z.string().min(3).max(50),
   action: z.array(z.nativeEnum(PermissionAction)).min(1),
 });
 
-export const updatePermissionBody = createPermissionBody.partial();
+export const updatePermissionSchema = permissionSchema.partial();
 
-export const permissionParamsSchema = z.object({
-  permissionId: documentId,
+export const permissionIdSchema = z.object({
+  permissionId: documentIdSchema,
 });
 
 // Action management schemas
-export const addActionBody = z.object({
+export const addActionSchema = z.object({
   actions: z.array(z.nativeEnum(PermissionAction)).min(1),
 });
 
-export const removeActionBody = z.object({
+export const removeActionSchema = z.object({
   actions: z.array(z.nativeEnum(PermissionAction)).min(1),
 });
-
-export type CreatePermissionBody = z.infer<typeof createPermissionBody>;
-export type UpdatePermissionBody = z.infer<typeof updatePermissionBody>;
-export type AddActionBody = z.infer<typeof addActionBody>;
-export type RemoveActionBody = z.infer<typeof removeActionBody>;

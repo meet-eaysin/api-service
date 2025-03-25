@@ -1,4 +1,2 @@
-import * as emailInterfaces from './email.interfaces';
-import * as emailService from './email.service';
-
-export { emailInterfaces, emailService };
+export { emailService } from './email.service';
+export { type TMessage } from './email.types';

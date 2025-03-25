@@ -1,5 +1,5 @@
+import { documentIdSchema } from '@/modules/validate';
 import { z } from 'zod';
-import { documentId } from '../validate';
 
 // Base schema
 export const roleSchema = z.object({
@@ -10,11 +10,6 @@ export const roleSchema = z.object({
 // Partial update schema (all fields optional)
 export const updateRoleSchema = roleSchema.partial();
 
-export const roleParamsSchema = z.object({
-  roleId: documentId,
+export const roleIdSchema = z.object({
+  roleId: documentIdSchema,
 });
-
-// Type definitions
-export type RoleParamsSchemaType = z.infer<typeof roleParamsSchema>;
-export type RoleSchemaType = z.infer<typeof roleSchema>;
-export type UpdateRoleSchemaType = z.infer<typeof updateRoleSchema>;

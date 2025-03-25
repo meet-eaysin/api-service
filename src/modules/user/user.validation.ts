@@ -1,5 +1,5 @@
+import { documentIdSchema } from '@/modules/validate';
 import { z } from 'zod';
-import { documentId } from '../validate';
 
 // Password validation regex (now allows special characters)
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[^\s]{8,}$/;
@@ -32,15 +32,10 @@ export const loginSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters long'),
 });
 
-export const userParamsSchema = z.object({
-  userId: documentId,
+export const userIdSchema = z.object({
+  userId: documentIdSchema,
 });
 
-export const queryByEmployeeIdSchema = z.object({
-  employeeId: documentId,
+export const employeeIdSchema = z.object({
+  employeeId: documentIdSchema,
 });
-
-// Type definitions
-export type UserParamsSchemaType = z.infer<typeof userParamsSchema>;
-export type UserSchemaType = z.infer<typeof userSchema>;
-export type UpdateUserSchemaType = z.infer<typeof updateUserSchema>;

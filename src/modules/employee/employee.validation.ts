@@ -1,5 +1,5 @@
+import { documentIdSchema } from '@/modules/validate';
 import { z } from 'zod';
-import { documentId } from '../validate';
 
 export const employeeSchema = z.object({
   user: z.string().min(1, { message: 'User ID is required' }),
@@ -36,14 +36,10 @@ export const employeeSchema = z.object({
 
 export const updateEmployeeSchema = employeeSchema.partial();
 
-export const employeeParamsSchema = z.object({
-  employeeId: documentId,
+export const employeeIdSchema = z.object({
+  employeeId: documentIdSchema,
 });
 
-export const employeeQueryByUserIdSchema = z.object({
-  userId: documentId,
+export const employeeByUserIdSchema = z.object({
+  userId: documentIdSchema,
 });
-
-//types
-export type EmployeeSchemaType = z.infer<typeof employeeSchema>;
-export type UpdateEmployeeSchemaType = z.infer<typeof updateEmployeeSchema>;

@@ -1,16 +1,18 @@
-import catchAsync from '@/modules/utils/catch-async';
+import { requestMiddleware } from '@/modules/auth/middleware/request-middleware';
+import { ApiError, ErrorCode } from '@/modules/errors';
+import { TOptions } from '@/modules/paginate';
+import {
+  rolePermissionIdSchema,
+  rolePermissionSchema,
+  rolePermissionService,
+  updateRolePermissionSchema,
+} from '@/modules/role-permission';
+import { pick, sendResponse } from '@/modules/utils';
+import { catchAsync } from '@/modules/utils/catch-async';
+import { TDocumentId, querySchema } from '@/modules/validate';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import { requestMiddleware } from '../auth';
-import { ApiError } from '../errors';
-import { ErrorCode } from '../errors/error-codes';
-import { IOptions } from '../paginate/paginate';
-import { pick } from '../utils';
-import { sendResponse } from '../utils/send-response';
-import { DocumentId, querySchema } from '../validate';
-import { rolePermissionService } from './index';
-import { rolePermissionParamsSchema, rolePermissionSchema, updateRolePermissionSchema } from './role-permission.validation';
 
 /**
  * Create a new role-permission assignment
@@ -33,7 +35,7 @@ const createHandler = catchAsync(async (req: Request, res: Response) => {
  */
 const queryHandler = catchAsync(async (req: Request, res: Response) => {
   const filter = pick(req.query, ['role', 'permission']);
-  const options: IOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
+  const options: TOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
   const result = await rolePermissionService.query(filter, options);
 
   sendResponse({
@@ -48,7 +50,7 @@ const queryHandler = catchAsync(async (req: Request, res: Response) => {
  * Get a role-permission by ID
  * @route GET /role-permissions/:rolePermissionId
  */
-const queryByIdHandler = catchAsync(async (req: Request<{ rolePermissionId: DocumentId }>, res: Response) => {
+const queryByIdHandler = catchAsync(async (req: Request<{ rolePermissionId: TDocumentId }>, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.rolePermissionId)) {
     throw new ApiError({
       statusCode: httpStatus.BAD_REQUEST,
@@ -71,7 +73,7 @@ const queryByIdHandler = catchAsync(async (req: Request<{ rolePermissionId: Docu
  * Partially update a role-permission
  * @route PATCH /role-permissions/:rolePermissionId
  */
-const partialUpdateHandler = catchAsync(async (req: Request<{ rolePermissionId: DocumentId }>, res: Response) => {
+const partialUpdateHandler = catchAsync(async (req: Request<{ rolePermissionId: TDocumentId }>, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.rolePermissionId)) {
     throw new ApiError({
       statusCode: httpStatus.BAD_REQUEST,
@@ -94,7 +96,7 @@ const partialUpdateHandler = catchAsync(async (req: Request<{ rolePermissionId: 
  * Replace a role-permission or create a new one if not found
  * @route PUT /role-permissions/:rolePermissionId
  */
-const upsertHandler = catchAsync(async (req: Request<{ rolePermissionId: DocumentId }>, res: Response) => {
+const upsertHandler = catchAsync(async (req: Request<{ rolePermissionId: TDocumentId }>, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.rolePermissionId)) {
     throw new ApiError({
       statusCode: httpStatus.BAD_REQUEST,
@@ -130,7 +132,7 @@ const upsertHandler = catchAsync(async (req: Request<{ rolePermissionId: Documen
  * Delete a role-permission by ID
  * @route DELETE /role-permissions/:rolePermissionId
  */
-const removeByIdHandler = catchAsync(async (req: Request<{ rolePermissionId: DocumentId }>, res: Response) => {
+const removeByIdHandler = catchAsync(async (req: Request<{ rolePermissionId: TDocumentId }>, res: Response) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.rolePermissionId)) {
     throw new ApiError({
       statusCode: httpStatus.BAD_REQUEST,
@@ -152,16 +154,16 @@ const removeByIdHandler = catchAsync(async (req: Request<{ rolePermissionId: Doc
 export const create = requestMiddleware(createHandler, { validation: { body: rolePermissionSchema } });
 export const query = requestMiddleware(queryHandler, { validation: { query: querySchema } });
 export const queryById = requestMiddleware(queryByIdHandler, {
-  validation: { params: rolePermissionParamsSchema },
+  validation: { params: rolePermissionIdSchema },
 });
 export const partialUpdate = requestMiddleware(partialUpdateHandler, {
-  validation: { params: rolePermissionParamsSchema, body: updateRolePermissionSchema },
+  validation: { params: rolePermissionIdSchema, body: updateRolePermissionSchema },
 });
 export const upsert = requestMiddleware(upsertHandler, {
-  validation: { params: rolePermissionParamsSchema, body: rolePermissionSchema },
+  validation: { params: rolePermissionIdSchema, body: rolePermissionSchema },
 });
 export const removeById = requestMiddleware(removeByIdHandler, {
-  validation: { params: rolePermissionParamsSchema },
+  validation: { params: rolePermissionIdSchema },
 });
 
 export const rolePermissionController = {

@@ -1,9 +1,9 @@
 import config from '@/config/config';
+import { TMessage } from '@/modules/email';
+import { logger } from '@/modules/logger';
 import nodemailer from 'nodemailer';
-import logger from '../logger/logger';
-import { Message } from './email.interfaces';
 
-export const transport = nodemailer.createTransport(config.email.smtp);
+const transport = nodemailer.createTransport(config.email.smtp);
 /* istanbul ignore next */
 if (config.env !== 'test') {
   transport
@@ -20,8 +20,8 @@ if (config.env !== 'test') {
  * @param {string} html
  * @returns {Promise<void>}
  */
-export const sendEmail = async (to: string, subject: string, text: string, html: string): Promise<void> => {
-  const msg: Message = {
+const sendEmail = async (to: string, subject: string, text: string, html: string): Promise<void> => {
+  const msg: TMessage = {
     from: config.email.from,
     to,
     subject,
@@ -37,7 +37,7 @@ export const sendEmail = async (to: string, subject: string, text: string, html:
  * @param {string} token
  * @returns {Promise<void>}
  */
-export const sendResetPasswordEmail = async (to: string, token: string): Promise<void> => {
+const sendResetPasswordEmail = async (to: string, token: string): Promise<void> => {
   const subject = 'Reset password';
   // replace this url with the link to the reset password page of your front-end app
   const resetPasswordUrl = `http://${config.clientUrl}/reset-password?token=${token}`;
@@ -59,7 +59,7 @@ export const sendResetPasswordEmail = async (to: string, token: string): Promise
  * @param {string} name
  * @returns {Promise<void>}
  */
-export const sendVerificationEmail = async (to: string, token: string, name: string): Promise<void> => {
+const sendVerificationEmail = async (to: string, token: string, name: string): Promise<void> => {
   const subject = 'Email Verification';
   // replace this url with the link to the email verification page of your front-end app
   const verificationEmailUrl = `http://${config.clientUrl}/verify-email?token=${token}`;
@@ -79,7 +79,7 @@ export const sendVerificationEmail = async (to: string, token: string, name: str
  * @param {string} name
  * @returns {Promise<void>}
  */
-export const sendSuccessfulRegistration = async (to: string, token: string, name: string): Promise<void> => {
+const sendSuccessfulRegistration = async (to: string, token: string, name: string): Promise<void> => {
   const subject = 'Email Verification';
   // replace this url with the link to the email verification page of your front-end app
   const verificationEmailUrl = `http://${config.clientUrl}/verify-email?token=${token}`;
@@ -104,7 +104,7 @@ export const sendSuccessfulRegistration = async (to: string, token: string, name
  * @param {string} name
  * @returns {Promise<void>}
  */
-export const sendAccountCreated = async (to: string, name: string): Promise<void> => {
+const sendAccountCreated = async (to: string, name: string): Promise<void> => {
   const subject = 'Account Created Successfully';
   // replace this url with the link to the email verification page of your front-end app
   const loginUrl = `http://${config.clientUrl}/auth/login`;
@@ -121,4 +121,12 @@ export const sendAccountCreated = async (to: string, name: string): Promise<void
   <p>Regards,</p>
   <p><strong>Team</strong></p></div>`;
   await sendEmail(to, subject, text, html);
+};
+
+export const emailService = {
+  sendEmail,
+  sendResetPasswordEmail,
+  sendVerificationEmail,
+  sendSuccessfulRegistration,
+  sendAccountCreated,
 };

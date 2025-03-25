@@ -7,10 +7,10 @@ import request from 'supertest';
 import app from '../../app';
 import config from '../../config/config';
 import setupTestDB from '../jest/setupTestDB';
+import { TokenTypes } from '../token';
 import * as tokenService from '../token/token.service';
-import tokenTypes from '../token/token.types';
+import { TUserSchema } from './user.interfaces';
 import User from './user.model';
-import { UserSchemaType } from './user.validation';
 
 setupTestDB();
 
@@ -46,8 +46,8 @@ const admin = {
   isEmailVerified: false,
 };
 
-const userOneAccessToken = tokenService.generateToken(userOne._id, accessTokenExpires, tokenTypes.ACCESS);
-const adminAccessToken = tokenService.generateToken(admin._id, accessTokenExpires, tokenTypes.ACCESS);
+const userOneAccessToken = tokenService.generateToken(userOne._id, accessTokenExpires, TokenTypes.ACCESS);
+const adminAccessToken = tokenService.generateToken(admin._id, accessTokenExpires, TokenTypes.ACCESS);
 
 const insertUsers = async (users: Record<string, any>[]) => {
   await User.insertMany(users.map((user) => ({ ...user, password: hashedPassword })));
@@ -55,7 +55,7 @@ const insertUsers = async (users: Record<string, any>[]) => {
 
 describe('User routes', () => {
   describe('POST /v1/users', () => {
-    let newUser: UserSchemaType;
+    let newUser: TUserSchema;
 
     beforeEach(() => {
       newUser = {

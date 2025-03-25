@@ -1,10 +1,10 @@
 import config from '@/config/config';
+import { requestMiddleware } from '@/modules/auth/middleware/request-middleware';
+import { TConfigMethodActions, THttpAction, THttpMethod } from '@/modules/resource';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
-import { requestMiddleware } from '../auth';
 import { catchAsync } from '../utils';
 import { sendResponse } from '../utils/send-response';
-import { ConfigMethodActions, HttpAction, HttpMethod } from './resource.interface';
 import { resourceService } from './resource.service';
 
 /**
@@ -29,9 +29,9 @@ const getResourcesHandler = catchAsync(async (_req: Request, res: Response) => {
  * @access  Public
  */
 const getMethodActionsHandler = catchAsync(async (_req: Request, res: Response) => {
-  const response: ConfigMethodActions = {
-    mappings: config.httpMethodToActionMap as Record<HttpMethod, HttpAction>,
-    allowedMethods: Object.keys(config.httpMethodToActionMap) as HttpMethod[],
+  const response: TConfigMethodActions = {
+    mappings: config.httpMethodToActionMap as Record<THttpMethod, THttpAction>,
+    allowedMethods: Object.keys(config.httpMethodToActionMap) as THttpMethod[],
   };
 
   sendResponse({

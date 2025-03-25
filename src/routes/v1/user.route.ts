@@ -1,4 +1,4 @@
-import { authenticateAndAuthorize } from '@/modules/auth';
+import { authenticateAndAuthorize } from '@/modules/auth/middleware/authorize-authenticate';
 import express, { Router } from 'express';
 import { userController } from '../../modules/user';
 

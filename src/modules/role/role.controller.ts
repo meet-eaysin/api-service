@@ -1,22 +1,19 @@
-import catchAsync from '@/modules/utils/catch-async';
+import { requestMiddleware } from '@/modules/auth/middleware/request-middleware';
+import { ApiError, ErrorCode } from '@/modules/errors';
+import { TOptions } from '@/modules/paginate';
+import { roleIdSchema, roleSchema, roleService, TRoleSchema, updateRoleSchema } from '@/modules/role';
+import { pick, sendResponse } from '@/modules/utils';
+import { catchAsync } from '@/modules/utils/catch-async';
+import { querySchema } from '@/modules/validate';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import { requestMiddleware } from '../auth';
-import { ApiError } from '../errors';
-import { ErrorCode } from '../errors/error-codes';
-import { IOptions } from '../paginate/paginate';
-import { pick } from '../utils';
-import { sendResponse } from '../utils/send-response';
-import { querySchema } from '../validate';
-import { roleService } from './index';
-import { roleParamsSchema, roleSchema, RoleSchemaType, updateRoleSchema } from './role.validation';
 
 /**
  * Create a new role
  * @route POST /roles
  */
-const createHandler = catchAsync(async (req: Request<{}, {}, RoleSchemaType>, res: Response) => {
+const createHandler = catchAsync(async (req: Request<{}, {}, TRoleSchema>, res: Response) => {
   const role = await roleService.create(req.body);
 
   sendResponse({
@@ -33,7 +30,7 @@ const createHandler = catchAsync(async (req: Request<{}, {}, RoleSchemaType>, re
  */
 const queryHandler = catchAsync(async (req: Request, res: Response) => {
   const filter = pick(req.query, ['name', 'description']);
-  const options: IOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
+  const options: TOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
   const result = await roleService.query(filter, options);
 
   sendResponse({
@@ -156,14 +153,14 @@ const removeByIdHandler = catchAsync(async (req: Request<{ roleId: string }>, re
 // Middleware-wrapped controller methods with validation
 export const create = requestMiddleware(createHandler, { validation: { body: roleSchema } });
 export const query = requestMiddleware(queryHandler, { validation: { query: querySchema } });
-export const queryById = requestMiddleware(queryByIdHandler, { validation: { params: roleParamsSchema } });
+export const queryById = requestMiddleware(queryByIdHandler, { validation: { params: roleIdSchema } });
 export const partialUpdate = requestMiddleware(partialUpdateHandler, {
-  validation: { params: roleParamsSchema, body: updateRoleSchema },
+  validation: { params: roleIdSchema, body: updateRoleSchema },
 });
 export const upsert = requestMiddleware(upsertHandler, {
-  validation: { params: roleParamsSchema, body: roleSchema },
+  validation: { params: roleIdSchema, body: roleSchema },
 });
-export const removeById = requestMiddleware(removeByIdHandler, { validation: { params: roleParamsSchema } });
+export const removeById = requestMiddleware(removeByIdHandler, { validation: { params: roleIdSchema } });
 
 export const roleController = {
   create,

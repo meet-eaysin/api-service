@@ -1,17 +1,17 @@
+import config from '@/config/config';
+import { TPayload } from '@/modules/token';
+import { User } from '@/modules/user';
 import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
-import tokenTypes from '../token/token.types';
-import config from '../../config/config';
-import User from '../user/user.model';
-import { IPayload } from '../token/token.interfaces';
+import { TokenTypes } from '../token/token.model';
 
-const jwtStrategy = new JwtStrategy(
+export const jwtStrategy = new JwtStrategy(
   {
     secretOrKey: config.jwt.secret,
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   },
-  async (payload: IPayload, done) => {
+  async (payload: TPayload, done) => {
     try {
-      if (payload.type !== tokenTypes.ACCESS) {
+      if (payload.type !== TokenTypes.ACCESS) {
         throw new Error('Invalid token type');
       }
       const user = await User.findById(payload.sub);
@@ -22,7 +22,5 @@ const jwtStrategy = new JwtStrategy(
     } catch (error) {
       done(error, false);
     }
-  }
+  },
 );
-
-export default jwtStrategy;

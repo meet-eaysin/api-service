@@ -1,22 +1,22 @@
+import { paginate } from '@/modules/paginate';
+import { PermissionAction, TPermissionDoc, TPermissionModel } from '@/modules/permission';
+import { toJSON } from '@/modules/toJSON';
+import { TDocumentId } from '@/modules/validate';
 import mongoose, { FilterQuery, model, Schema } from 'mongoose';
-import { paginate } from '../paginate';
-import { toJSON } from '../toJSON';
-import { DocumentId } from '../validate';
-import { IPermissionDoc, IPermissionModel, PermissionAction } from './permission.interface';
 
-const permissionSchema = new Schema<IPermissionDoc, IPermissionModel>(
+const permissionSchema = new Schema<TPermissionDoc, TPermissionModel>(
   {
     resource: {
       type: String,
       required: true,
       trim: true,
       lowercase: true,
-      unique: true, // Ensures one document per resource
+      unique: true,
       minlength: 3,
       maxlength: 50,
     },
     action: {
-      type: [String], // Array of actions
+      type: [String],
       required: true,
       enum: Object.values(PermissionAction),
       set: (values: PermissionAction[]) => values.map((value) => value.toLowerCase()),
@@ -36,8 +36,8 @@ permissionSchema.plugin(paginate);
 
 permissionSchema.static(
   'isResourceTaken',
-  async function (resource: string, excludePermissionId?: DocumentId, session?: mongoose.ClientSession) {
-    const query: FilterQuery<IPermissionDoc> = {
+  async function (resource: string, excludePermissionId?: TDocumentId, session?: mongoose.ClientSession) {
+    const query: FilterQuery<TPermissionDoc> = {
       resource: resource.toLowerCase(),
     };
 
@@ -48,4 +48,4 @@ permissionSchema.static(
   },
 );
 
-export const Permission = model<IPermissionDoc, IPermissionModel>('Permission', permissionSchema);
+export const Permission = model<TPermissionDoc, TPermissionModel>('Permission', permissionSchema);

@@ -1,8 +1,10 @@
+import { TOptions, TQueryResult } from '@/modules/paginate';
+import { TDocumentId } from '@/modules/validate';
 import { Document, FilterQuery, Model, Types } from 'mongoose';
-import { IOptions, QueryResult } from '../paginate/paginate';
-import { DocumentId } from '../validate';
+import { z } from 'zod';
+import { employeeSchema, updateEmployeeSchema } from './employee.validation';
 
-export interface IEmployee {
+export type TEmployee = {
   user: Types.ObjectId;
   email: string;
   first_name: string;
@@ -43,14 +45,17 @@ export interface IEmployee {
     phone: string;
   }>;
   isActive: boolean;
-}
+};
 
-export type IEmployeeDoc = IEmployee & Document;
+export type TEmployeeDoc = TEmployee & Document;
 
-export interface IEmployeeModel extends Model<IEmployeeDoc> {
-  paginate(filter: FilterQuery<IEmployeeDoc>, options: IOptions): Promise<QueryResult<IEmployeeDoc>>;
-  isEmailTaken(email: string, excludeUserId?: DocumentId): Promise<boolean>;
-}
+export type TEmployeeModel = Model<TEmployeeDoc> & {
+  paginate(filter: FilterQuery<TEmployeeDoc>, options: TOptions): Promise<TQueryResult<TEmployeeDoc>>;
+  isEmailTaken(email: string, excludeUserId?: TDocumentId): Promise<boolean>;
+};
+
+export type TEmployeeSchema = z.infer<typeof employeeSchema>;
+export type TUpdateEmployeeSchema = z.infer<typeof updateEmployeeSchema>;
 
 export enum EmploymentStatus {
   ACTIVE = 'active',

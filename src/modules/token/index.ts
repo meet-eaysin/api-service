@@ -1,6 +1,11 @@
-import * as tokenService from './token.service';
-import Token from './token.model';
-import * as tokenInterfaces from './token.interfaces';
-import tokenTypes from './token.types';
-
-export { tokenService, Token, tokenInterfaces, tokenTypes };
+export { Token } from './token.model';
+export { tokenService } from './token.service';
+export {
+  type TAccessAndRefreshTokens,
+  type TNewToken,
+  type TPayload,
+  type TToken,
+  type TTokenDoc,
+  type TTokenModel,
+  type TTokenPayload,
+} from './token.types';

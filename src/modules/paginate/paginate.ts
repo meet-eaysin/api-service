@@ -1,23 +1,8 @@
 /* eslint-disable no-param-reassign */
 import mongoose, { Document, Schema } from 'mongoose';
+import { TOptions, TQueryResult } from './paginate.types';
 
-export interface QueryResult<T> {
-  results: T[];
-  page: number;
-  limit: number;
-  totalPages: number;
-  totalResults: number;
-}
-
-export interface IOptions {
-  sortBy?: string;
-  projectBy?: string;
-  populate?: string;
-  limit?: number;
-  page?: number;
-}
-
-const paginate = <T extends Document>(schema: Schema<T>): void => {
+export const paginate = <T extends Document>(schema: Schema<T>): void => {
   /**
    * @typedef {Object} QueryResult
    * @property {Document[]} results - Results found
@@ -41,9 +26,9 @@ const paginate = <T extends Document>(schema: Schema<T>): void => {
     'paginate',
     async function (
       filter: Record<string, any>,
-      options: IOptions,
+      options: TOptions,
       session?: mongoose.ClientSession,
-    ): Promise<QueryResult<T>> {
+    ): Promise<TQueryResult<T>> {
       let sort: string = '';
       if (options.sortBy) {
         const sortingCriteria: any = [];
@@ -111,5 +96,3 @@ const paginate = <T extends Document>(schema: Schema<T>): void => {
     },
   );
 };
-
-export default paginate;

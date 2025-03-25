@@ -1,22 +1,37 @@
 import { Document, Model } from 'mongoose';
-import { IOptions, QueryResult } from './paginate';
 
-export interface IProject {
+export type TQueryResult<T> = {
+  results: T[];
+  page: number;
+  limit: number;
+  totalPages: number;
+  totalResults: number;
+};
+
+export type TOptions = {
+  sortBy?: string;
+  projectBy?: string;
+  populate?: string;
+  limit?: number;
+  page?: number;
+};
+
+export type TProject = {
   name: string;
   milestones: number;
-}
+};
 
-export interface ITask {
+export type TTask = {
   name: string;
   project: string;
-}
+};
 
-export interface IProjectDoc extends IProject, Document {}
-export interface ITaskDoc extends ITask, Document {}
+export type TProjectDoc = TProject & Document;
+export type TTaskDoc = TTask & Document;
 
-export interface IProjectModel extends Model<IProjectDoc> {
-  paginate(filter: Record<string, any>, options: IOptions): Promise<QueryResult<IProjectDoc>>;
-}
-export interface ITaskModel extends Model<ITaskDoc> {
-  paginate(filter: Record<string, any>, options: IOptions): Promise<QueryResult<IProjectDoc>>;
-}
+export type TProjectModel = Model<TProjectDoc> & {
+  paginate(filter: Record<string, any>, options: TOptions): Promise<TQueryResult<TProjectDoc>>;
+};
+export type TTaskModel = Model<TTaskDoc> & {
+  paginate(filter: Record<string, any>, options: TOptions): Promise<TQueryResult<TProjectDoc>>;
+};

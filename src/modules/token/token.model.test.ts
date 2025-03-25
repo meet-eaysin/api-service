@@ -2,10 +2,9 @@ import { faker } from '@faker-js/faker';
 import moment from 'moment';
 import mongoose from 'mongoose';
 import config from '../../config/config';
-import { NewToken } from './token.interfaces';
 import Token from './token.model';
 import * as tokenService from './token.service';
-import tokenTypes from './token.types';
+import { TNewToken, TokenTypes } from './token.types';
 
 const password = 'password1';
 const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
@@ -19,16 +18,16 @@ const userOne = {
   isEmailVerified: false,
 };
 
-const userOneAccessToken = tokenService.generateToken(userOne._id, accessTokenExpires, tokenTypes.ACCESS);
+const userOneAccessToken = tokenService.generateToken(userOne._id, accessTokenExpires, TokenTypes.ACCESS);
 
 describe('Token Model', () => {
   const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
-  let newToken: NewToken;
+  let newToken: TNewToken;
   beforeEach(() => {
     newToken = {
       token: userOneAccessToken,
       user: userOne._id.toHexString(),
-      type: tokenTypes.REFRESH,
+      type: TokenTypes.REFRESH,
       expires: refreshTokenExpires.toDate(),
     };
   });

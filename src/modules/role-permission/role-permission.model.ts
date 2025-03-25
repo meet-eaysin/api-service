@@ -1,10 +1,10 @@
+import { paginate } from '@/modules/paginate';
+import { TRolePermissionDoc, TRolePermissionModel } from '@/modules/role-permission';
+import { toJSON } from '@/modules/toJSON';
+import { TDocumentId } from '@/modules/validate';
 import mongoose, { model, Schema, Types } from 'mongoose';
-import { paginate } from '../paginate';
-import { toJSON } from '../toJSON';
-import { DocumentId } from '../validate';
-import { IRolePermissionDoc, IRolePermissionModel } from './role-permission.interface';
 
-const rolePermissionSchema = new Schema<IRolePermissionDoc, IRolePermissionModel>(
+const rolePermissionSchema = new Schema<TRolePermissionDoc, TRolePermissionModel>(
   {
     role: {
       type: Schema.Types.ObjectId,
@@ -58,8 +58,8 @@ rolePermissionSchema.index({ updatedAt: 1 });
 // Static methods
 rolePermissionSchema.static(
   'isRolePermissionExists',
-  async function (roleId: DocumentId, permissionId: DocumentId, excludeId?: DocumentId): Promise<boolean> {
-    const query: mongoose.FilterQuery<IRolePermissionDoc> = {
+  async function (roleId: TDocumentId, permissionId: TDocumentId, excludeId?: TDocumentId): Promise<boolean> {
+    const query: mongoose.FilterQuery<TRolePermissionDoc> = {
       role: roleId,
       permission: permissionId,
     };
@@ -72,8 +72,8 @@ rolePermissionSchema.static(
 );
 
 // Virtual
-rolePermissionSchema.virtual('combined').get(function (this: IRolePermissionDoc) {
+rolePermissionSchema.virtual('combined').get(function (this: TRolePermissionDoc) {
   return `${this.role}:${this.permission}`;
 });
 
-export const RolePermission = model<IRolePermissionDoc, IRolePermissionModel>('RolePermission', rolePermissionSchema);
+export const RolePermission = model<TRolePermissionDoc, TRolePermissionModel>('RolePermission', rolePermissionSchema);

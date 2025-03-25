@@ -1,9 +1,15 @@
+import { toJSON } from '@/modules/toJSON';
+import { TTokenDoc, TTokenModel } from '@/modules/token';
 import mongoose from 'mongoose';
-import tokenTypes from './token.types';
-import toJSON from '../toJSON/toJSON';
-import { ITokenDoc, ITokenModel } from './token.interfaces';
 
-const tokenSchema = new mongoose.Schema<ITokenDoc, ITokenModel>(
+export enum TokenTypes {
+  ACCESS = 'access',
+  REFRESH = 'refresh',
+  RESET_PASSWORD = 'resetPassword',
+  VERIFY_EMAIL = 'verifyEmail',
+}
+
+const tokenSchema = new mongoose.Schema<TTokenDoc, TTokenModel>(
   {
     token: {
       type: String,
@@ -17,7 +23,7 @@ const tokenSchema = new mongoose.Schema<ITokenDoc, ITokenModel>(
     },
     type: {
       type: String,
-      enum: [tokenTypes.REFRESH, tokenTypes.RESET_PASSWORD, tokenTypes.VERIFY_EMAIL],
+      enum: Object.values(TokenTypes),
       required: true,
     },
     expires: {
@@ -31,12 +37,10 @@ const tokenSchema = new mongoose.Schema<ITokenDoc, ITokenModel>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // add plugin that converts mongoose to json
 tokenSchema.plugin(toJSON);
 
-const Token = mongoose.model<ITokenDoc, ITokenModel>('Token', tokenSchema);
-
-export default Token;
+export const Token = mongoose.model<TTokenDoc, TTokenModel>('Token', tokenSchema);

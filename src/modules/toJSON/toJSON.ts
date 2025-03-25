@@ -16,7 +16,7 @@ const deleteAtPath = (obj: any, path: any, index: number) => {
   deleteAtPath(obj[path[index]], path, index + 1);
 };
 
-const toJSON = (schema: any) => {
+export const toJSON = (schema: any) => {
   let transform: Function;
   if (schema.options.toJSON && schema.options.toJSON.transform) {
     transform = schema.options.toJSON.transform;
@@ -47,5 +47,3 @@ const toJSON = (schema: any) => {
     },
   });
 };
-
-export default toJSON;

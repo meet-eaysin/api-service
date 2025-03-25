@@ -1,12 +1,9 @@
-import { DocumentId } from '@/modules/validate';
+import { ApiError, ErrorCode } from '@/modules/errors';
+import { TOptions, TQueryResult } from '@/modules/paginate';
+import { TUpdateUserSchema, TUserDoc, TUserSchema, User } from '@/modules/user';
+import { TDocumentId } from '@/modules/validate';
 import httpStatus from 'http-status';
 import { ClientSession } from 'mongoose';
-import { ApiError } from '../errors';
-import { ErrorCode } from '../errors/error-codes';
-import { IOptions, QueryResult } from '../paginate/paginate';
-import { IUserDoc } from './user.interfaces';
-import User from './user.model';
-import { UpdateUserSchemaType, UserSchemaType } from './user.validation';
 
 /**
  * Create a user
@@ -14,7 +11,7 @@ import { UpdateUserSchemaType, UserSchemaType } from './user.validation';
  * @param {ClientSession} [session] - MongoDB transaction session
  * @returns {Promise<IUserDoc>} Created user
  */
-const create = async (userBody: UserSchemaType, session?: ClientSession): Promise<IUserDoc> => {
+const create = async (userBody: TUserSchema, session?: ClientSession): Promise<TUserDoc> => {
   if (await User.isEmailTaken(userBody.email, undefined, session)) {
     throw new ApiError({
       statusCode: httpStatus.BAD_REQUEST,
@@ -23,7 +20,7 @@ const create = async (userBody: UserSchemaType, session?: ClientSession): Promis
     });
   }
   const [user] = await User.create([userBody], { session });
-  return user as IUserDoc;
+  return user as TUserDoc;
 };
 
 /**
@@ -32,7 +29,7 @@ const create = async (userBody: UserSchemaType, session?: ClientSession): Promis
  * @param {ClientSession} [session] - MongoDB transaction session
  * @returns {Promise<IUserDoc>} Registered user
  */
-const register = async (userBody: UserSchemaType, session?: ClientSession): Promise<IUserDoc> => {
+const register = async (userBody: TUserSchema, session?: ClientSession): Promise<TUserDoc> => {
   if (await User.isEmailTaken(userBody.email, undefined, session)) {
     throw new ApiError({
       statusCode: httpStatus.BAD_REQUEST,
@@ -41,7 +38,7 @@ const register = async (userBody: UserSchemaType, session?: ClientSession): Prom
     });
   }
   const [user] = await User.create([userBody], { session });
-  return user as IUserDoc;
+  return user as TUserDoc;
 };
 
 /**
@@ -53,19 +50,19 @@ const register = async (userBody: UserSchemaType, session?: ClientSession): Prom
  */
 const query = async (
   filter: Record<string, any>,
-  options: IOptions,
+  options: TOptions,
   session?: ClientSession,
-): Promise<QueryResult<IUserDoc>> => {
+): Promise<TQueryResult<TUserDoc>> => {
   return User.paginate(filter, options, session);
 };
 
 /**
  * Get user by ID
- * @param {DocumentId} id - User ID
+ * @param {TTDocumentId} id - User ID
  * @param {ClientSession} [session] - MongoDB transaction session
  * @returns {Promise<IUserDoc | null>} User document
  */
-const queryById = async (id: DocumentId, session?: ClientSession): Promise<IUserDoc | null> => {
+const queryById = async (id: TDocumentId, session?: ClientSession): Promise<TUserDoc | null> => {
   return User.findById(id)
     .session(session || null)
     .populate('role');
@@ -77,22 +74,22 @@ const queryById = async (id: DocumentId, session?: ClientSession): Promise<IUser
  * @param {ClientSession} [session] - MongoDB transaction session
  * @returns {Promise<IUserDoc | null>} User document
  */
-const getByEmail = async (email: string, session?: ClientSession): Promise<IUserDoc | null> => {
+const getByEmail = async (email: string, session?: ClientSession): Promise<TUserDoc | null> => {
   return User.findOne({ email }).session(session || null);
 };
 
 /**
  * Update user by ID
- * @param {DocumentId} userId - User ID
+ * @param {TDocumentId} userId - User ID
  * @param {UpdateUserSchemaType} updateBody - Update data
  * @param {ClientSession} [session] - MongoDB transaction session
  * @returns {Promise<IUserDoc>} Updated user
  */
 const updateById = async (
-  userId: DocumentId,
-  updateBody: UpdateUserSchemaType,
+  userId: TDocumentId,
+  updateBody: TUpdateUserSchema,
   session?: ClientSession,
-): Promise<IUserDoc> => {
+): Promise<TUserDoc> => {
   const user = await queryById(userId, session);
   if (!user) {
     throw new ApiError({
@@ -117,11 +114,11 @@ const updateById = async (
 
 /**
  * Delete user by ID
- * @param {DocumentId} userId - User ID
+ * @param {TDocumentId} userId - User ID
  * @param {ClientSession} [session] - MongoDB transaction session
  * @returns {Promise<IUserDoc>} Deleted user
  */
-const removeById = async (userId: DocumentId, session?: ClientSession): Promise<IUserDoc> => {
+const removeById = async (userId: TDocumentId, session?: ClientSession): Promise<TUserDoc> => {
   const user = await User.findByIdAndDelete(userId, { session: session || null });
   if (!user) {
     throw new ApiError({
@@ -135,11 +132,11 @@ const removeById = async (userId: DocumentId, session?: ClientSession): Promise<
 
 /**
  * Get users by employee ID (returns array for flexibility)
- * @param {DocumentId | null} [employeeId=null] - Employee ID (null for unassigned)
+ * @param {TDocumentId | null} [employeeId=null] - Employee ID (null for unassigned)
  * @param {ClientSession} [session] - MongoDB session
  * @returns {Promise<IUserDoc[]>} Array of users
  */
-const getByEmployeeId = async (employeeId: DocumentId | null = null, session?: ClientSession): Promise<IUserDoc[]> => {
+const getByEmployeeId = async (employeeId: TDocumentId | null = null, session?: ClientSession): Promise<TUserDoc[]> => {
   return User.find({ employee: employeeId })
     .session(session || null)
     .populate('role');

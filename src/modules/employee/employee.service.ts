@@ -1,11 +1,8 @@
-import { ApiError } from '@/modules/errors';
+import { Employee, TEmployeeDoc, TEmployeeSchema, TUpdateEmployeeSchema } from '@/modules/employee';
+import { ApiError, ErrorCode } from '@/modules/errors';
+import { TOptions } from '@/modules/paginate';
+import { TDocumentId } from '@/modules/validate';
 import httpStatus from 'http-status';
-import { ErrorCode } from '../errors/error-codes';
-import { IOptions } from '../paginate/paginate';
-import { DocumentId } from '../validate';
-import { IEmployeeDoc } from './employee.interface';
-import Employee from './employee.model';
-import { EmployeeSchemaType, UpdateEmployeeSchemaType } from './employee.validation';
 
 /**
  * Create an employee
@@ -13,7 +10,7 @@ import { EmployeeSchemaType, UpdateEmployeeSchemaType } from './employee.validat
  * @returns {Promise<IEmployeeDoc>} The created employee
  * @throws {ApiError} if email is already taken
  */
-export const create = async (employeeBody: EmployeeSchemaType): Promise<IEmployeeDoc> => {
+export const create = async (employeeBody: TEmployeeSchema): Promise<TEmployeeDoc> => {
   return Employee.create(employeeBody);
 };
 
@@ -23,7 +20,7 @@ export const create = async (employeeBody: EmployeeSchemaType): Promise<IEmploye
  * @param {Object} options - Query options
  * @returns {Promise<QueryResult>} The query result
  */
-export const query = async (filter: Record<string, any>, options: IOptions) => {
+export const query = async (filter: Record<string, any>, options: TOptions) => {
   return await Employee.paginate(filter, options);
 };
 
@@ -33,7 +30,7 @@ export const query = async (filter: Record<string, any>, options: IOptions) => {
  * @returns {Promise<IEmployeeDoc>} The employee
  * @throws {ApiError} if employee is not found
  */
-export const queryById = async (id: DocumentId): Promise<IEmployeeDoc> => {
+export const queryById = async (id: TDocumentId): Promise<TEmployeeDoc> => {
   const employee = await Employee.findById(id);
   if (!employee) {
     throw new ApiError({
@@ -51,7 +48,7 @@ export const queryById = async (id: DocumentId): Promise<IEmployeeDoc> => {
  * @returns {Promise<IEmployeeDoc>} The employee
  * @throws {ApiError} if employee is not found
  */
-export const queryByUserId = async (userId: DocumentId): Promise<IEmployeeDoc> => {
+export const queryByUserId = async (userId: TDocumentId): Promise<TEmployeeDoc> => {
   const employee = await Employee.findOne({ user: userId });
   if (!employee) {
     throw new ApiError({
@@ -72,7 +69,7 @@ export const queryByUserId = async (userId: DocumentId): Promise<IEmployeeDoc> =
  * @throws {ApiError} if employee is not found
  * @throws {ApiError} if email is already taken
  */
-export const replaceById = async (employeeId: DocumentId, updateBody: EmployeeSchemaType): Promise<IEmployeeDoc> => {
+export const replaceById = async (employeeId: TDocumentId, updateBody: TEmployeeSchema): Promise<TEmployeeDoc> => {
   const employee = await queryById(employeeId);
 
   Object.assign(employee, updateBody);
@@ -88,7 +85,7 @@ export const replaceById = async (employeeId: DocumentId, updateBody: EmployeeSc
  * @throws {ApiError} if employee is not found
  * @throws {ApiError} if email is already taken
  */
-export const updateById = async (employeeId: DocumentId, updateBody: UpdateEmployeeSchemaType): Promise<IEmployeeDoc> => {
+export const updateById = async (employeeId: TDocumentId, updateBody: TUpdateEmployeeSchema): Promise<TEmployeeDoc> => {
   const employee = await queryById(employeeId);
 
   Object.assign(employee, updateBody);
@@ -102,7 +99,7 @@ export const updateById = async (employeeId: DocumentId, updateBody: UpdateEmplo
  * @returns {Promise<IEmployeeDoc>} The deleted employee
  * @throws {ApiError} if employee is not found
  */
-export const removeById = async (employeeId: DocumentId): Promise<IEmployeeDoc> => {
+export const removeById = async (employeeId: TDocumentId): Promise<TEmployeeDoc> => {
   const employee = await queryById(employeeId);
   await employee.deleteOne();
   return employee;
@@ -113,6 +110,7 @@ export const employeeService = {
   query,
   queryById,
   replaceById,
+  queryByUserId,
   updateById,
   removeById,
 };

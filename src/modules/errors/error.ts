@@ -1,8 +1,7 @@
+import { ApiError, ErrorCode } from '@/modules/errors';
+import { sendResponse } from '@/modules/utils';
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
-import { sendResponse } from '../utils/send-response';
-import { ApiError } from './ApiError';
-import { ErrorCode } from './error-codes';
 
 export const errorConverter = (err: any, _req: Request, _res: Response, next: NextFunction) => {
   let error = err;

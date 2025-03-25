@@ -1,11 +1,14 @@
 import { ApiError } from '@/modules/errors';
+import { TOptions, TQueryResult } from '@/modules/paginate';
+import {
+  RolePermission,
+  TRolePermissionDoc,
+  TRolePermissionSchema,
+  TUpdateRolePermissionSchema,
+} from '@/modules/role-permission';
+import { TDocumentId } from '@/modules/validate';
 import httpStatus from 'http-status';
 import { ClientSession, Types } from 'mongoose';
-import { IOptions, QueryResult } from '../paginate/paginate';
-import { DocumentId } from '../validate';
-import { IRolePermissionDoc } from './role-permission.interface';
-import { RolePermission } from './role-permission.model';
-import { RolePermissionSchemaType, UpdateRolePermissionSchemaType } from './role-permission.validation';
 
 /**
  * Checks if a role-permission combination already exists in the database.
@@ -19,7 +22,7 @@ import { RolePermissionSchemaType, UpdateRolePermissionSchemaType } from './role
 const checkExists = async (
   roleId: Types.ObjectId,
   permissionId: Types.ObjectId,
-  excludeId?: DocumentId,
+  excludeId?: TDocumentId,
   session?: ClientSession,
 ): Promise<boolean> => {
   const query: any = { role: roleId, permission: permissionId };
@@ -35,7 +38,7 @@ const checkExists = async (
  * @returns The created role-permission assignment document
  * @throws ApiError if the role-permission combination already exists
  */
-export const create = async (payload: RolePermissionSchemaType, session?: ClientSession): Promise<IRolePermissionDoc> => {
+const create = async (payload: TRolePermissionSchema, session?: ClientSession): Promise<TRolePermissionDoc> => {
   const roleId = new Types.ObjectId(payload.role);
   const permissionId = new Types.ObjectId(payload.permission);
 
@@ -48,7 +51,7 @@ export const create = async (payload: RolePermissionSchemaType, session?: Client
   }
 
   const [assignment] = await RolePermission.create([payload], { session });
-  return assignment as unknown as IRolePermissionDoc;
+  return assignment as unknown as TRolePermissionDoc;
 };
 
 /**
@@ -59,11 +62,11 @@ export const create = async (payload: RolePermissionSchemaType, session?: Client
  * @param session - Optional mongoose session for transactional operations
  * @returns The paginated query result
  */
-export const query = async (
+const query = async (
   filter: Record<string, any>,
-  options: IOptions,
+  options: TOptions,
   session?: ClientSession,
-): Promise<QueryResult<IRolePermissionDoc>> => {
+): Promise<TQueryResult<TRolePermissionDoc>> => {
   return RolePermission.paginate(filter, options, session);
 };
 
@@ -76,7 +79,7 @@ export const query = async (
  * @throws ApiError if the role-permission assignment is not found
  */
 
-export const queryById = async (id: DocumentId, session?: ClientSession): Promise<IRolePermissionDoc> => {
+const queryById = async (id: TDocumentId, session?: ClientSession): Promise<TRolePermissionDoc> => {
   const assignment = await RolePermission.findById(id).session(session || null);
   if (!assignment)
     throw new ApiError({
@@ -96,11 +99,11 @@ export const queryById = async (id: DocumentId, session?: ClientSession): Promis
  * @returns The updated role-permission assignment document
  * @throws ApiError if the role-permission assignment is not found or if the role-permission combination already exists
  */
-export const updateById = async (
-  id: DocumentId,
-  updateBody: UpdateRolePermissionSchemaType,
+const updateById = async (
+  id: TDocumentId,
+  updateBody: TUpdateRolePermissionSchema,
   session?: ClientSession,
-): Promise<IRolePermissionDoc> => {
+): Promise<TRolePermissionDoc> => {
   const assignment = await queryById(id, session);
 
   const newRole = updateBody?.role ? new Types.ObjectId(updateBody.role) : (assignment.role as Types.ObjectId);
@@ -132,11 +135,11 @@ export const updateById = async (
  * @returns The replaced or created role-permission assignment document
  * @throws ApiError if the role-permission combination already exists
  */
-export const replaceById = async (
-  id: DocumentId,
-  replaceBody: RolePermissionSchemaType,
+const replaceById = async (
+  id: TDocumentId,
+  replaceBody: TRolePermissionSchema,
   session?: ClientSession,
-): Promise<IRolePermissionDoc> => {
+): Promise<TRolePermissionDoc> => {
   try {
     const assignment = await queryById(id, session);
 
@@ -172,7 +175,7 @@ export const replaceById = async (
  * @returns The deleted role-permission assignment document
  * @throws ApiError if the role-permission assignment is not found
  */
-export const removeById = async (id: DocumentId, session?: ClientSession): Promise<IRolePermissionDoc> => {
+const removeById = async (id: TDocumentId, session?: ClientSession): Promise<TRolePermissionDoc> => {
   const assignment = await RolePermission.findByIdAndDelete(id, { session: session || null });
   if (!assignment)
     throw new ApiError({

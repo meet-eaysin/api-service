@@ -1,23 +1,20 @@
+import {
+  authService,
+  forgotPasswordSchema,
+  logoutSchema,
+  refreshTokensSchema,
+  registerSchema,
+  resetPasswordQuerySchema,
+  resetPasswordSchema,
+  verifyEmailQuerySchema,
+} from '@/modules/auth';
+import { requestMiddleware } from '@/modules/auth/middleware/request-middleware';
+import { emailService } from '@/modules/email';
+import { tokenService } from '@/modules/token';
+import { loginSchema, TUserDoc, userService } from '@/modules/user';
+import { catchAsync, sendResponse } from '@/modules/utils';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
-import { emailService } from '../email';
-import { tokenService } from '../token';
-import { userService } from '../user';
-import { IUserDoc } from '../user/user.interfaces';
-import catchAsync from '../utils/catch-async';
-import { sendResponse } from '../utils/send-response';
-import { requestMiddleware } from './auth.middleware';
-import { authService } from './auth.service';
-import {
-  forgotPasswordBodySchema,
-  loginBodySchema,
-  logoutBodySchema,
-  refreshTokensBodySchema,
-  registerBodySchema,
-  resetPasswordBodySchema,
-  resetPasswordQuerySchema,
-  verifyEmailQuerySchema,
-} from './auth.validation';
 
 /**
  * @desc Register a new user
@@ -153,7 +150,7 @@ const verifyEmailHandler = catchAsync(async (req: Request, res: Response) => {
  * @access Private
  */
 const meHandler = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user as IUserDoc;
+  const user = req.user as TUserDoc;
 
   sendResponse({
     res,
@@ -164,20 +161,32 @@ const meHandler = catchAsync(async (req: Request, res: Response) => {
 });
 
 // Middleware-wrapped controller methods with validation
-export const register = requestMiddleware(registerHandler, { validation: { body: registerBodySchema } });
-export const login = requestMiddleware(loginHandler, { validation: { body: loginBodySchema } });
-export const logout = requestMiddleware(logoutHandler, { validation: { body: logoutBodySchema } });
-export const refreshTokens = requestMiddleware(refreshTokensHandler, {
-  validation: { body: refreshTokensBodySchema },
+const register = requestMiddleware(registerHandler, { validation: { body: registerSchema } });
+const login = requestMiddleware(loginHandler, { validation: { body: loginSchema } });
+const logout = requestMiddleware(logoutHandler, { validation: { body: logoutSchema } });
+const refreshTokens = requestMiddleware(refreshTokensHandler, {
+  validation: { body: refreshTokensSchema },
 });
-export const forgotPassword = requestMiddleware(forgotPasswordHandler, {
-  validation: { body: forgotPasswordBodySchema },
+const forgotPassword = requestMiddleware(forgotPasswordHandler, {
+  validation: { body: forgotPasswordSchema },
 });
-export const resetPassword = requestMiddleware(resetPasswordHandler, {
-  validation: { body: resetPasswordBodySchema, query: resetPasswordQuerySchema },
+const resetPassword = requestMiddleware(resetPasswordHandler, {
+  validation: { body: resetPasswordSchema, query: resetPasswordQuerySchema },
 });
-export const sendVerificationEmail = requestMiddleware(sendVerificationEmailHandler);
-export const verifyEmail = requestMiddleware(verifyEmailHandler, {
+const sendVerificationEmail = requestMiddleware(sendVerificationEmailHandler);
+const verifyEmail = requestMiddleware(verifyEmailHandler, {
   validation: { query: verifyEmailQuerySchema },
 });
-export const me = requestMiddleware(meHandler);
+const me = requestMiddleware(meHandler);
+
+export const authController = {
+  register,
+  login,
+  logout,
+  refreshTokens,
+  forgotPassword,
+  resetPassword,
+  sendVerificationEmail,
+  verifyEmail,
+  me,
+};

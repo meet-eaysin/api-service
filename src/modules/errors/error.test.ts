@@ -5,7 +5,7 @@ import httpMocks from 'node-mocks-http';
 import winston from 'winston';
 import config from '../../config/config';
 import logger from '../logger/logger';
-import { ApiError } from './ApiError';
+import { ApiError } from './api-error';
 import { errorConverter, errorHandler } from './error';
 import { ErrorCode } from './error-codes';
 

@@ -9,7 +9,7 @@ export const querySchema = z.object({
   page: z.number().min(1).default(1),
 });
 
-export const documentId = z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+export const documentIdSchema = z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
   message: 'Invalid ObjectId',
 });
 
@@ -24,6 +24,6 @@ export const passwordSchema = z
   });
 
 // Type exports
-export type DocumentId = mongoose.Types.ObjectId | string;
-export type QuerySchema = z.infer<typeof querySchema>;
-export type PasswordType = z.infer<typeof passwordSchema>;
+export type TDocumentId = mongoose.Types.ObjectId | string;
+export type TQuerySchema = z.infer<typeof querySchema>;
+export type TPassword = z.infer<typeof passwordSchema>;

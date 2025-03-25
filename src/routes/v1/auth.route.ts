@@ -1,4 +1,5 @@
-import { authController, authenticateAndAuthorize } from '@/modules/auth';
+import { authController } from '@/modules/auth';
+import { authenticateAndAuthorize } from '@/modules/auth/middleware/authorize-authenticate';
 import express, { Router } from 'express';
 
 const authRoute: Router = express.Router();

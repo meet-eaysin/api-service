@@ -1,20 +1,20 @@
-export interface IApiResponse<T = any> {
+export interface TApiResponse<T = any> {
   success: boolean;
   message: string;
   data?: T;
-  error?: IApiError;
+  error?: TApiError;
   [key: string]: any;
 }
 
-export interface IApiError {
+export interface TApiError {
   code: string;
   message: string;
-  invalidFields?: InvalidFields[];
+  invalidFields?: TInvalidFields[];
   data?: any;
   [key: string]: any;
 }
 
-export interface InvalidFields {
+export interface TInvalidFields {
   field: string;
   messages: string;
 }

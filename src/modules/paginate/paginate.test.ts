@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 import setupTestDB from '../jest/setupTestDB';
 import { toJSON } from '../toJSON';
 import paginate from './paginate';
-import { IProject, IProjectDoc, IProjectModel, ITaskDoc, ITaskModel } from './paginate.types';
+import { TProject, TProjectDoc, TProjectModel, TTaskDoc, TTaskModel } from './paginate.types';
 
-const projectSchema = new mongoose.Schema<IProjectDoc, IProjectModel>({
+const projectSchema = new mongoose.Schema<TProjectDoc, TProjectModel>({
   name: {
     type: String,
     required: true,
@@ -23,9 +23,9 @@ projectSchema.virtual('tasks', {
 
 projectSchema.plugin(paginate);
 projectSchema.plugin(toJSON);
-const Project = mongoose.model<IProjectDoc, IProjectModel>('Project', projectSchema);
+const Project = mongoose.model<TProjectDoc, TProjectModel>('Project', projectSchema);
 
-const taskSchema = new mongoose.Schema<ITaskDoc, ITaskModel>({
+const taskSchema = new mongoose.Schema<TTaskDoc, TTaskModel>({
   name: {
     type: String,
     required: true,
@@ -39,7 +39,7 @@ const taskSchema = new mongoose.Schema<ITaskDoc, ITaskModel>({
 
 taskSchema.plugin(paginate);
 taskSchema.plugin(toJSON);
-const Task = mongoose.model<ITaskDoc, ITaskModel>('Task', taskSchema);
+const Task = mongoose.model<TTaskDoc, TTaskModel>('Task', taskSchema);
 
 setupTestDB();
 
@@ -97,7 +97,7 @@ describe('paginate plugin', () => {
   });
 
   describe('limit option', () => {
-    const projects: IProject[] = [
+    const projects: TProject[] = [
       { name: 'Project One', milestones: 1 },
       { name: 'Project Two', milestones: 2 },
       { name: 'Project Three', milestones: 3 },
@@ -116,7 +116,7 @@ describe('paginate plugin', () => {
   });
 
   describe('page option', () => {
-    const projects: IProject[] = [
+    const projects: TProject[] = [
       { name: 'Project One', milestones: 1 },
       { name: 'Project Two', milestones: 2 },
       { name: 'Project Three', milestones: 3 },
@@ -134,7 +134,7 @@ describe('paginate plugin', () => {
   });
 
   describe('projectBy option', () => {
-    const projects: IProject[] = [
+    const projects: TProject[] = [
       { name: 'Project One', milestones: 1 },
       { name: 'Project Two', milestones: 2 },
       { name: 'Project Three', milestones: 3 },

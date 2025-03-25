@@ -1,4 +1,4 @@
-export interface Message {
+export interface TMessage {
   from: string;
   to: string;
   subject: string;

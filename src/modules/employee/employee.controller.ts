@@ -1,29 +1,27 @@
-import catchAsync from '@/modules/utils/catch-async';
+import { requestMiddleware } from '@/modules/auth/middleware/request-middleware';
+import { ApiError, ErrorCode } from '@/modules/errors';
+import { TOptions } from '@/modules/paginate';
+import { pick, sendResponse } from '@/modules/utils';
+import { catchAsync } from '@/modules/utils/catch-async';
+import { querySchema } from '@/modules/validate';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import { requestMiddleware } from '../auth';
-import { ApiError } from '../errors';
-import { ErrorCode } from '../errors/error-codes';
-import { IOptions } from '../paginate/paginate';
-import { pick } from '../utils';
-import { sendResponse } from '../utils/send-response';
-import { querySchema } from '../validate';
 import {
-  employeeParamsSchema,
-  employeeQueryByUserIdSchema,
+  employeeByUserIdSchema,
+  employeeIdSchema,
   employeeSchema,
-  EmployeeSchemaType,
+  employeeService,
   updateEmployeeSchema,
-} from './employee.validation';
-import { employeeService } from './index';
+  type TEmployeeSchema,
+} from './index';
 
 /**
  * @desc    Create a new employee
  * @route   POST /employees
  * @access  Private/Admin
  */
-const createHandler = catchAsync(async (req: Request<{}, {}, EmployeeSchemaType>, res: Response) => {
+const createHandler = catchAsync(async (req: Request<{}, {}, TEmployeeSchema>, res: Response) => {
   const employee = await employeeService.create(req.body);
 
   sendResponse({
@@ -41,7 +39,7 @@ const createHandler = catchAsync(async (req: Request<{}, {}, EmployeeSchemaType>
  */
 const queryHandler = catchAsync(async (req: Request, res: Response) => {
   const filter = pick(req.query, ['first_name', 'last_name', 'email', 'department', 'position']);
-  const options: IOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
+  const options: TOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
   const result = await employeeService.query(filter, options);
 
   sendResponse({
@@ -177,22 +175,22 @@ const removeByIdHandler = catchAsync(async (req: Request<{ employeeId: string }>
 });
 
 // Middleware-wrapped exports remain unchanged
-export const create = requestMiddleware(createHandler, { validation: { body: employeeSchema } });
-export const query = requestMiddleware(queryHandler, { validation: { query: querySchema } });
-export const queryById = requestMiddleware(queryByIdHandler, {
-  validation: { params: employeeParamsSchema },
+const create = requestMiddleware(createHandler, { validation: { body: employeeSchema } });
+const query = requestMiddleware(queryHandler, { validation: { query: querySchema } });
+const queryById = requestMiddleware(queryByIdHandler, {
+  validation: { params: employeeIdSchema },
 });
-export const queryByUserId = requestMiddleware(queryByUserIdHandler, {
-  validation: { params: employeeQueryByUserIdSchema },
+const queryByUserId = requestMiddleware(queryByUserIdHandler, {
+  validation: { params: employeeByUserIdSchema },
 });
-export const partialUpdate = requestMiddleware(partialUpdateHandler, {
-  validation: { params: employeeParamsSchema, body: updateEmployeeSchema },
+const partialUpdate = requestMiddleware(partialUpdateHandler, {
+  validation: { params: employeeIdSchema, body: updateEmployeeSchema },
 });
-export const upsert = requestMiddleware(upsertHandler, {
-  validation: { params: employeeParamsSchema, body: employeeSchema },
+const upsert = requestMiddleware(upsertHandler, {
+  validation: { params: employeeIdSchema, body: employeeSchema },
 });
-export const removeById = requestMiddleware(removeByIdHandler, {
-  validation: { params: employeeParamsSchema },
+const removeById = requestMiddleware(removeByIdHandler, {
+  validation: { params: employeeIdSchema },
 });
 
 export const employeeController = {
@@ -200,6 +198,7 @@ export const employeeController = {
   query,
   queryById,
   partialUpdate,
+  queryByUserId,
   upsert,
   removeById,
 };

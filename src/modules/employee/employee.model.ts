@@ -1,11 +1,11 @@
+import { TEmployeeDoc, TEmployeeModel } from '@/modules/employee';
+import { TDocumentId } from '@/modules/validate';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { model, Schema } from 'mongoose';
 import { paginate } from '../paginate';
 import { toJSON } from '../toJSON';
-import { DocumentId } from '../validate';
-import { IEmployeeDoc, IEmployeeModel } from './employee.interface';
 
-const employeeSchema = new Schema<IEmployeeDoc, IEmployeeModel>(
+const employeeSchema = new Schema<TEmployeeDoc, TEmployeeModel>(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -63,7 +63,7 @@ const employeeSchema = new Schema<IEmployeeDoc, IEmployeeModel>(
       type: Date,
       required: true,
       validate: {
-        validator: function (this: IEmployeeDoc, value: Date) {
+        validator: function (this: TEmployeeDoc, value: Date) {
           return value > this.date_of_birth;
         },
         message: 'Hire date must be after date of birth',
@@ -159,11 +159,9 @@ employeeSchema.pre('save', function (next) {
 });
 
 // Static methods
-employeeSchema.static('isEmailTaken', async function (email: string, excludeUserId?: DocumentId) {
+employeeSchema.static('isEmailTaken', async function (email: string, excludeUserId?: TDocumentId) {
   const employee = await this.findOne({ email, _id: { $ne: excludeUserId } });
   return !!employee;
 });
 
-const Employee = model<IEmployeeDoc, IEmployeeModel>('Employee', employeeSchema);
-
-export default Employee;
+export const Employee = model<TEmployeeDoc, TEmployeeModel>('Employee', employeeSchema);

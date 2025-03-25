@@ -1,24 +1,28 @@
-import catchAsync from '@/modules/utils/catch-async';
+import { requestMiddleware } from '@/modules/auth/middleware/request-middleware';
+import { ApiError, ErrorCode } from '@/modules/errors';
+import { TOptions } from '@/modules/paginate';
+import {
+  addActionSchema,
+  permissionIdSchema,
+  permissionSchema,
+  permissionService,
+  removeActionSchema,
+  TPermissionSchema,
+  updatePermissionSchema,
+} from '@/modules/permission';
+import { updateRolePermissionSchema } from '@/modules/role-permission';
+import { catchAsync, pick, sendResponse } from '@/modules/utils';
+import { querySchema } from '@/modules/validate';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import { requestMiddleware } from '../auth';
-import { ApiError } from '../errors';
-import { ErrorCode } from '../errors/error-codes';
-import { IOptions } from '../paginate/paginate';
-import { permissionParamsSchema, updatePermissionBody } from '../permission/permission.validation';
-import { pick } from '../utils';
-import { sendResponse } from '../utils/send-response';
-import { querySchema } from '../validate';
-import { permissionService } from './permission.service';
-import { addActionBody, createPermissionBody, CreatePermissionBody, removeActionBody } from './permission.validation';
 
 /**
  * @desc    Create a new permission resource with actions
  * @route   POST /permissions
  * @access  Private/Admin
  */
-const createHandler = catchAsync(async (req: Request<{}, {}, CreatePermissionBody>, res: Response) => {
+const createHandler = catchAsync(async (req: Request<{}, {}, TPermissionSchema>, res: Response) => {
   const permission = await permissionService.create(req.body);
 
   sendResponse({
@@ -36,7 +40,7 @@ const createHandler = catchAsync(async (req: Request<{}, {}, CreatePermissionBod
  */
 const queryHandler = catchAsync(async (req: Request, res: Response) => {
   const filter = pick(req.query, ['resource', 'action']);
-  const options: IOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
+  const options: TOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
   const result = await permissionService.query(filter, options);
 
   sendResponse({
@@ -212,26 +216,26 @@ const removeByIdHandler = catchAsync(async (req: Request<{ permissionId: string 
 
 // Middleware-wrapped exports remain unchanged
 export const create = requestMiddleware(createHandler, {
-  validation: { body: createPermissionBody },
+  validation: { body: permissionSchema },
 });
 export const query = requestMiddleware(queryHandler, { validation: { query: querySchema } });
 export const queryById = requestMiddleware(queryByIdHandler, {
-  validation: { params: permissionParamsSchema },
+  validation: { params: permissionIdSchema },
 });
 export const partialUpdate = requestMiddleware(partialUpdateHandler, {
-  validation: { params: permissionParamsSchema, body: updatePermissionBody },
+  validation: { params: permissionIdSchema, body: updateRolePermissionSchema },
 });
 export const upsert = requestMiddleware(upsertHandler, {
-  validation: { params: permissionParamsSchema, body: createPermissionBody },
+  validation: { params: permissionIdSchema, body: updatePermissionSchema },
 });
 export const addActions = requestMiddleware(addActionHandler, {
-  validation: { params: permissionParamsSchema, body: addActionBody },
+  validation: { params: permissionIdSchema, body: addActionSchema },
 });
 export const removeActions = requestMiddleware(removeActionHandler, {
-  validation: { params: permissionParamsSchema, body: removeActionBody },
+  validation: { params: permissionIdSchema, body: removeActionSchema },
 });
 export const removeById = requestMiddleware(removeByIdHandler, {
-  validation: { params: permissionParamsSchema },
+  validation: { params: permissionIdSchema },
 });
 
 export const permissionController = {

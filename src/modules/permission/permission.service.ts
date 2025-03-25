@@ -1,13 +1,16 @@
+import { TOptions, TQueryResult } from '@/modules/paginate';
+import {
+  Permission,
+  PermissionAction,
+  TPermissionDoc,
+  TPermissionSchema,
+  TUpdatePermissionSchema,
+} from '@/modules/permission';
+import { TDocumentId } from '@/modules/validate';
 // permission.service.ts
 import { ApiError } from '@/modules/errors';
 import httpStatus from 'http-status';
 import { ClientSession, FilterQuery } from 'mongoose';
-import { replaceById } from '../employee/employee.service';
-import { IOptions, QueryResult } from '../paginate/paginate';
-import { DocumentId } from '../validate';
-import { IPermissionDoc, PermissionAction } from './permission.interface';
-import { Permission } from './permission.model';
-import { CreatePermissionBody, UpdatePermissionBody } from './permission.validation';
 
 /**
  * Checks if a permission with the specified resource already exists in the database.
@@ -18,8 +21,8 @@ import { CreatePermissionBody, UpdatePermissionBody } from './permission.validat
  * @returns A promise that resolves to true if the resource exists, false otherwise
  */
 
-const checkExists = async (resource: string, excludeId?: DocumentId, session?: ClientSession): Promise<boolean> => {
-  const query: FilterQuery<IPermissionDoc> = { resource };
+const checkExists = async (resource: string, excludeId?: TDocumentId, session?: ClientSession): Promise<boolean> => {
+  const query: FilterQuery<TPermissionDoc> = { resource };
   if (excludeId) query._id = { $ne: excludeId };
   return !!(await Permission.findOne(query).session(session || null));
 };
@@ -34,10 +37,10 @@ const checkExists = async (resource: string, excludeId?: DocumentId, session?: C
  */
 
 export const query = async (
-  filter: FilterQuery<IPermissionDoc>,
-  options: IOptions,
+  filter: FilterQuery<TPermissionDoc>,
+  options: TOptions,
   session?: ClientSession,
-): Promise<QueryResult<IPermissionDoc>> => {
+): Promise<TQueryResult<TPermissionDoc>> => {
   return Permission.paginate(filter, options, session);
 };
 
@@ -50,7 +53,7 @@ export const query = async (
  * @throws ApiError if the resource already exists
  */
 
-export const create = async (body: CreatePermissionBody, session?: ClientSession): Promise<IPermissionDoc> => {
+export const create = async (body: TPermissionSchema, session?: ClientSession): Promise<TPermissionDoc> => {
   if (await checkExists(body.resource, undefined, session)) {
     throw new ApiError({
       statusCode: httpStatus.BAD_REQUEST,
@@ -59,7 +62,7 @@ export const create = async (body: CreatePermissionBody, session?: ClientSession
     });
   }
   const [permission] = await Permission.create([body], { session });
-  return permission as unknown as IPermissionDoc;
+  return permission as unknown as TPermissionDoc;
 };
 
 /**
@@ -71,7 +74,7 @@ export const create = async (body: CreatePermissionBody, session?: ClientSession
  * @throws ApiError if the permission is not found
  */
 
-export const queryById = async (id: DocumentId, session?: ClientSession): Promise<IPermissionDoc> => {
+export const queryById = async (id: TDocumentId, session?: ClientSession): Promise<TPermissionDoc> => {
   const permission = await Permission.findById(id).session(session || null);
   if (!permission)
     throw new ApiError({
@@ -92,11 +95,11 @@ export const queryById = async (id: DocumentId, session?: ClientSession): Promis
  * @returns The replaced permission document
  * @throws ApiError if the resource name is already taken
  */
-export const replacePermission = async (
-  id: DocumentId,
-  updateBody: CreatePermissionBody,
+export const replaceById = async (
+  id: TDocumentId,
+  updateBody: TPermissionSchema,
   session?: ClientSession,
-): Promise<IPermissionDoc> => {
+): Promise<TPermissionDoc> => {
   const permission = await queryById(id, session);
 
   if (updateBody.resource !== permission.resource) {
@@ -125,10 +128,10 @@ export const replacePermission = async (
  * @throws ApiError if the permission is not found or if the resource name is already taken
  */
 export const updateById = async (
-  id: DocumentId,
-  updateBody: UpdatePermissionBody,
+  id: TDocumentId,
+  updateBody: TUpdatePermissionSchema,
   session?: ClientSession,
-): Promise<IPermissionDoc> => {
+): Promise<TPermissionDoc> => {
   const permission = await queryById(id, session);
 
   if (updateBody.resource && updateBody.resource !== permission.resource) {
@@ -158,7 +161,7 @@ export const updateById = async (
  * @returns The deleted permission document
  * @throws ApiError if the permission is not found
  */
-export const removeById = async (id: DocumentId, session?: ClientSession): Promise<IPermissionDoc> => {
+export const removeById = async (id: TDocumentId, session?: ClientSession): Promise<TPermissionDoc> => {
   const permission = await Permission.findByIdAndDelete(id, { session: session || null });
   if (!permission)
     throw new ApiError({
@@ -178,10 +181,10 @@ export const removeById = async (id: DocumentId, session?: ClientSession): Promi
  * @returns The updated permission document
  */
 export const addAction = async (
-  id: DocumentId,
+  id: TDocumentId,
   action: PermissionAction,
   session?: ClientSession,
-): Promise<IPermissionDoc> => {
+): Promise<TPermissionDoc> => {
   const permission = await queryById(id, session);
 
   if (!permission.action.includes(action)) {
@@ -201,10 +204,10 @@ export const addAction = async (
  * @returns The updated permission document
  */
 export const removeAction = async (
-  id: DocumentId,
+  id: TDocumentId,
   action: PermissionAction,
   session?: ClientSession,
-): Promise<IPermissionDoc> => {
+): Promise<TPermissionDoc> => {
   const permission = await queryById(id, session);
 
   if (permission.action.includes(action)) {
@@ -219,8 +222,8 @@ export const permissionService = {
   query,
   create,
   queryById,
-  replaceById,
   updateById,
+  replaceById,
   removeById,
   addAction,
   removeAction,

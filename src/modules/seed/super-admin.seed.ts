@@ -1,7 +1,6 @@
-// seed.utils.ts
 import config from '@/config/config';
 import { ApiError } from '@/modules/errors';
-import { PermissionAction } from '@/modules/permission/permission.interface';
+import { PermissionAction } from '@/modules/permission';
 import { permissionService } from '@/modules/permission/permission.service';
 import { resourceService } from '@/modules/resource/resource.service';
 import { rolePermissionService } from '@/modules/role-permission/role-permission.service';

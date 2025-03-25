@@ -1,7 +1,14 @@
-import { userService } from '@/modules/user/user.service';
-import * as userController from './user.controller';
-import * as userInterfaces from './user.interfaces';
-import User from './user.model';
-import * as userValidation from './user.validation';
-
-export { User, userController, userInterfaces, userService, userValidation };
+export { userService } from '@/modules/user/user.service';
+export { userController } from './user.controller';
+export type {
+  TEmployeeIdSchema,
+  TUpdateUserSchema,
+  TUser,
+  TUserDoc,
+  TUserIdSchema,
+  TUserModel,
+  TUserSchema,
+  TUserWithTokens,
+} from './user.interfaces';
+export { User } from './user.model';
+export { loginSchema, updateUserSchema, userIdSchema, userSchema } from './user.validation';

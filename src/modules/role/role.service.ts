@@ -1,11 +1,9 @@
 import { ApiError } from '@/modules/errors';
+import { TOptions, TQueryResult } from '@/modules/paginate';
+import { Role, TRoleDoc, TRoleSchema, TUpdateRoleSchema } from '@/modules/role';
+import { TDocumentId } from '@/modules/validate';
 import httpStatus from 'http-status';
 import { ClientSession, FilterQuery } from 'mongoose';
-import { IOptions, QueryResult } from '../paginate/paginate';
-import { DocumentId } from '../validate';
-import { IRoleDoc } from './role.interface';
-import { Role } from './role.model';
-import { RoleSchemaType, UpdateRoleSchemaType } from './role.validation';
 
 /**
  * Checks if a role with the given name already exists.
@@ -14,8 +12,8 @@ import { RoleSchemaType, UpdateRoleSchemaType } from './role.validation';
  * @param {ClientSession} [session] - Optional mongoose session for transactional operations
  * @returns {Promise<boolean>} Whether the role name is already taken
  */
-const checkNameTaken = async (name: string, excludeId?: DocumentId, session?: ClientSession): Promise<boolean> => {
-  const query: FilterQuery<IRoleDoc> = { name };
+const checkNameTaken = async (name: string, excludeId?: TDocumentId, session?: ClientSession): Promise<boolean> => {
+  const query: FilterQuery<TRoleDoc> = { name };
   if (excludeId) query._id = { $ne: excludeId };
   return !!(await Role.findOne(query).session(session || null));
 };
@@ -29,7 +27,7 @@ const checkNameTaken = async (name: string, excludeId?: DocumentId, session?: Cl
  * @throws {ApiError} If the role name is already taken.
  */
 
-const create = async (roleBody: RoleSchemaType, session?: ClientSession): Promise<IRoleDoc> => {
+const create = async (roleBody: TRoleSchema, session?: ClientSession): Promise<TRoleDoc> => {
   if (await checkNameTaken(roleBody.name)) {
     throw new ApiError({
       statusCode: httpStatus.BAD_REQUEST,
@@ -40,7 +38,7 @@ const create = async (roleBody: RoleSchemaType, session?: ClientSession): Promis
 
   const result = await Role.create([roleBody], { session });
 
-  return result[0] as IRoleDoc;
+  return result[0] as TRoleDoc;
 };
 
 /**
@@ -52,10 +50,10 @@ const create = async (roleBody: RoleSchemaType, session?: ClientSession): Promis
  */
 
 const query = async (
-  filter: FilterQuery<IRoleDoc>,
-  options: IOptions,
+  filter: FilterQuery<TRoleDoc>,
+  options: TOptions,
   session?: ClientSession,
-): Promise<QueryResult<IRoleDoc>> => {
+): Promise<TQueryResult<TRoleDoc>> => {
   return Role.paginate(filter, options, session);
 };
 
@@ -68,7 +66,7 @@ const query = async (
  * @throws ApiError if the role is not found
  */
 
-const queryById = async (id: DocumentId, session?: ClientSession): Promise<IRoleDoc> => {
+const queryById = async (id: TDocumentId, session?: ClientSession): Promise<TRoleDoc> => {
   const role = await Role.findById(id).session(session || null);
   if (!role)
     throw new ApiError({
@@ -87,7 +85,7 @@ const queryById = async (id: DocumentId, session?: ClientSession): Promise<IRole
  * @returns The role document if found, otherwise null
  */
 
-const queryByName = async (name: string, session?: ClientSession): Promise<IRoleDoc | null> => {
+const queryByName = async (name: string, session?: ClientSession): Promise<TRoleDoc | null> => {
   return Role.findOne({ name }).session(session || null);
 };
 
@@ -100,10 +98,10 @@ const queryByName = async (name: string, session?: ClientSession): Promise<IRole
  * @throws ApiError if role not found or if the role name is already taken
  */
 const updateById = async (
-  roleId: DocumentId,
-  updateBody: UpdateRoleSchemaType,
+  roleId: TDocumentId,
+  updateBody: TUpdateRoleSchema,
   session?: ClientSession,
-): Promise<IRoleDoc> => {
+): Promise<TRoleDoc> => {
   const role = await queryById(roleId, session);
 
   if (updateBody.name && updateBody.name !== role.name) {
@@ -133,7 +131,7 @@ const updateById = async (
  * @returns The replaced role document
  * @throws ApiError if role not found or if the role name is already taken
  */
-const replaceById = async (roleId: DocumentId, replaceBody: RoleSchemaType, session?: ClientSession): Promise<IRoleDoc> => {
+const replaceById = async (roleId: TDocumentId, replaceBody: TRoleSchema, session?: ClientSession): Promise<TRoleDoc> => {
   // Check if new name is already taken by another role
   if (await checkNameTaken(replaceBody.name, roleId, session)) {
     throw new ApiError({
@@ -165,7 +163,7 @@ const replaceById = async (roleId: DocumentId, replaceBody: RoleSchemaType, sess
  * @returns The deleted role document
  * @throws ApiError if the role is not found
  */
-const removeById = async (roleId: DocumentId, session?: ClientSession): Promise<IRoleDoc> => {
+const removeById = async (roleId: TDocumentId, session?: ClientSession): Promise<TRoleDoc> => {
   const role = await Role.findByIdAndDelete(roleId, { session: session || null });
   if (!role)
     throw new ApiError({

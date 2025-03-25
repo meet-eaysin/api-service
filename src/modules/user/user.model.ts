@@ -1,12 +1,12 @@
+import { paginate } from '@/modules/paginate';
+import { toJSON } from '@/modules/toJSON';
+import { TUserDoc, TUserModel } from '@/modules/user';
+import { TDocumentId } from '@/modules/validate';
 import bcrypt from 'bcryptjs';
 import mongoose, { ClientSession, Schema } from 'mongoose';
 import validator from 'validator';
-import paginate from '../paginate/paginate';
-import toJSON from '../toJSON/toJSON';
-import { DocumentId } from '../validate';
-import { IUserDoc, IUserModel } from './user.interfaces';
 
-const userSchema = new mongoose.Schema<IUserDoc, IUserModel>(
+const userSchema = new mongoose.Schema<TUserDoc, TUserModel>(
   {
     name: {
       type: String,
@@ -69,7 +69,7 @@ userSchema.plugin(paginate);
 
 userSchema.static(
   'isEmailTaken',
-  async function (email: string, excludeUserId?: DocumentId, session?: ClientSession): Promise<boolean> {
+  async function (email: string, excludeUserId?: TDocumentId, session?: ClientSession): Promise<boolean> {
     const query: any = { email: email.toLowerCase() };
     if (excludeUserId) query._id = { $ne: excludeUserId };
 
@@ -95,7 +95,7 @@ userSchema.pre('save', async function (next) {
 
 userSchema.static(
   'isUsernameTaken',
-  async function (username: string, excludeUserId?: DocumentId, session?: ClientSession): Promise<boolean> {
+  async function (username: string, excludeUserId?: TDocumentId, session?: ClientSession): Promise<boolean> {
     const query: any = {
       username: { $regex: new RegExp(`^${username}$`, 'i') },
     };
@@ -118,7 +118,7 @@ userSchema.static(
  */
 userSchema.static(
   'isEmailTaken',
-  async function (email: string, excludeUserId?: DocumentId, session?: ClientSession): Promise<boolean> {
+  async function (email: string, excludeUserId?: TDocumentId, session?: ClientSession): Promise<boolean> {
     const query: any = {
       email: email.toLowerCase(),
       _id: { $ne: excludeUserId },
@@ -133,6 +133,4 @@ userSchema.static(
   },
 );
 
-const User = mongoose.model<IUserDoc, IUserModel>('User', userSchema);
-
-export default User;
+export const User = mongoose.model<TUserDoc, TUserModel>('User', userSchema);

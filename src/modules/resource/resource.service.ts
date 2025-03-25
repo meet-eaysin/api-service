@@ -1,14 +1,14 @@
 // resource.service.ts
 
 import config from '@/config/config';
+import { TResource } from '@/modules/resource';
 import { defaultIRoute } from '@/routes/v1';
-import { Resource } from './resource.interface';
 
 const mapMethodToAction = (method: string): string => {
   return config.httpMethodToActionMap[method] || 'read';
 };
 
-const getResources = (): Resource[] => {
+const getResources = (): TResource[] => {
   return defaultIRoute.map((route) => ({
     name: route.resourceName || route.path.replace(/^\//, '').replace(/\//g, '-'),
     path: route.path,

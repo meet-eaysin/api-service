@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker';
+import { TUserSchema } from './user.interfaces';
 import User from './user.model';
-import { UserSchemaType } from './user.validation';
 
 describe('User model', () => {
   describe('User validation', () => {
-    let newUser: UserSchemaType;
+    let newUser: TUserSchema;
     beforeEach(() => {
       newUser = {
         name: faker.name.fullName(),

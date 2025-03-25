@@ -1,3 +1,8 @@
-import { documentId, DocumentId, passwordSchema, PasswordType, QuerySchema, querySchema } from './custom.validation';
-
-export { documentId, DocumentId, passwordSchema, PasswordType, QuerySchema, querySchema };
+export {
+  documentIdSchema,
+  passwordSchema,
+  querySchema,
+  type TDocumentId,
+  type TPassword,
+  type TQuerySchema,
+} from './custom.validation';

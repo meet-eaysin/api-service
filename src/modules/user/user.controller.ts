@@ -1,15 +1,13 @@
+import { requestMiddleware } from '@/modules/auth/middleware/request-middleware';
+import { employeeIdSchema } from '@/modules/employee';
+import { ApiError, ErrorCode } from '@/modules/errors';
+import { TOptions } from '@/modules/paginate';
+import { userIdSchema, userSchema, userService } from '@/modules/user';
+import { pick, sendResponse } from '@/modules/utils';
+import { TDocumentId, querySchema } from '@/modules/validate';
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import { requestMiddleware } from '../auth';
-import { ApiError } from '../errors';
-import { ErrorCode } from '../errors/error-codes';
-import { IOptions } from '../paginate/paginate';
-import { pick } from '../utils';
-import { sendResponse } from '../utils/send-response';
-import { DocumentId, querySchema } from '../validate';
-import { userService } from './user.service';
-import { queryByEmployeeIdSchema, userParamsSchema, userSchema } from './user.validation';
 
 /**
  * @desc    Create a new user
@@ -33,7 +31,7 @@ const createHandler = async (req: Request, res: Response) => {
  */
 const queryHandler = async (req: Request, res: Response) => {
   const filter = pick(req.query, ['name', 'role', 'status', 'createdAt', 'updatedAt']);
-  const options: IOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
+  const options: TOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
   const result = await userService.query(filter, options);
 
   sendResponse({
@@ -49,7 +47,7 @@ const queryHandler = async (req: Request, res: Response) => {
  * @route   GET /api/users/:userId
  * @access  Private/Admin
  */
-const queryByIdHandler = async (req: Request<{ userId: DocumentId }>, res: Response) => {
+const queryByIdHandler = async (req: Request<{ userId: TDocumentId }>, res: Response) => {
   const userId = req.params.userId;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -82,7 +80,7 @@ const queryByIdHandler = async (req: Request<{ userId: DocumentId }>, res: Respo
  * @route   PATCH /api/users/:userId
  * @access  Private/Admin
  */
-const updateHandler = async (req: Request<{ userId: DocumentId }>, res: Response) => {
+const updateHandler = async (req: Request<{ userId: TDocumentId }>, res: Response) => {
   const userId = req.params.userId;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -107,7 +105,7 @@ const updateHandler = async (req: Request<{ userId: DocumentId }>, res: Response
  * @route   DELETE /api/users/:userId
  * @access  Private/Admin
  */
-const removeByIdHandler = async (req: Request<{ userId: DocumentId }>, res: Response) => {
+const removeByIdHandler = async (req: Request<{ userId: TDocumentId }>, res: Response) => {
   const userId = req.params.userId;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -144,15 +142,15 @@ const queryByEmployeeIdHandler = async (req: Request<{}, {}, {}, { employeeId: s
 };
 
 // Middleware-wrapped controller methods with validation
-export const create = requestMiddleware(createHandler, { validation: { body: userSchema } });
-export const query = requestMiddleware(queryHandler, { validation: { query: querySchema } });
-export const queryById = requestMiddleware(queryByIdHandler, { validation: { params: userParamsSchema } });
-export const update = requestMiddleware(updateHandler, {
-  validation: { params: userParamsSchema, body: userSchema },
+const create = requestMiddleware(createHandler, { validation: { body: userSchema } });
+const query = requestMiddleware(queryHandler, { validation: { query: querySchema } });
+const queryById = requestMiddleware(queryByIdHandler, { validation: { params: userIdSchema } });
+const update = requestMiddleware(updateHandler, {
+  validation: { params: userIdSchema, body: userSchema },
 });
-export const removeById = requestMiddleware(removeByIdHandler, { validation: { params: userParamsSchema } });
-export const queryByEmployeeId = requestMiddleware(queryByEmployeeIdHandler, {
-  validation: { query: queryByEmployeeIdSchema },
+const removeById = requestMiddleware(removeByIdHandler, { validation: { params: userIdSchema } });
+const queryByEmployeeId = requestMiddleware(queryByEmployeeIdHandler, {
+  validation: { query: employeeIdSchema },
 });
 
 export const userController = {

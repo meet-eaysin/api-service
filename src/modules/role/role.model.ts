@@ -1,10 +1,10 @@
+import { paginate } from '@/modules/paginate';
+import { TRoleDoc, TRoleModel } from '@/modules/role';
+import { toJSON } from '@/modules/toJSON';
+import { TDocumentId } from '@/modules/validate';
 import mongoose, { model, Schema } from 'mongoose';
-import { paginate } from '../paginate';
-import { toJSON } from '../toJSON';
-import { DocumentId } from '../validate';
-import { IRoleDoc, IRoleModel } from './role.interface';
 
-const roleSchema = new Schema<IRoleDoc, IRoleModel>(
+const roleSchema = new Schema<TRoleDoc, TRoleModel>(
   {
     name: { type: String, required: true, unique: true },
     description: { type: String },
@@ -25,7 +25,7 @@ roleSchema.plugin(paginate);
  */
 roleSchema.static(
   'isRoleNameTaken',
-  async function (name: string, excludeRoleId?: DocumentId, session?: mongoose.ClientSession): Promise<boolean> {
+  async function (name: string, excludeRoleId?: TDocumentId, session?: mongoose.ClientSession): Promise<boolean> {
     const role = await this.findOne({
       name: { $regex: new RegExp(`^${name}$`, 'i') },
       ...(excludeRoleId && { _id: { $ne: excludeRoleId } }),
@@ -35,4 +35,4 @@ roleSchema.static(
   },
 );
 
-export const Role = model<IRoleDoc, IRoleModel>('Role', roleSchema);
+export const Role = model<TRoleDoc, TRoleModel>('Role', roleSchema);

@@ -1,3 +1,6 @@
+import { jwtStrategy } from '@/modules/auth';
+import { ApiError, ErrorCode, errorConverter, errorHandler } from '@/modules/errors';
+import { logErrorHandler, logSuccessHandler } from '@/modules/logger';
 import compression from 'compression';
 import cors from 'cors';
 import express, { Express } from 'express';
@@ -8,18 +11,14 @@ import passport from 'passport';
 import path from 'path';
 import xss from 'xss-clean';
 import config from './config/config';
-import { jwtStrategy } from './modules/auth';
-import { ApiError, errorConverter, errorHandler } from './modules/errors';
-import { ErrorCode } from './modules/errors/error-codes';
-import { morgan } from './modules/logger';
-import { authLimiter } from './modules/utils';
+import { authLimiter } from './modules/utils/rate-limiter';
 import routes from './routes/v1';
 
 const app: Express = express();
 
 if (config.env !== 'test') {
-  app.use(morgan.successHandler);
-  app.use(morgan.errorHandler);
+  app.use(logSuccessHandler);
+  app.use(logErrorHandler);
 }
 
 // set security HTTP headers

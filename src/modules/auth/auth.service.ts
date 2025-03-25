@@ -1,12 +1,9 @@
+import { ApiError, ErrorCode } from '@/modules/errors';
+import { Token, tokenService } from '@/modules/token';
+import { TUserDoc, TUserWithTokens, userService } from '@/modules/user';
+import { getErrorData } from '@/modules/utils';
 import httpStatus from 'http-status';
-import { ApiError } from '../errors';
-import { ErrorCode } from '../errors/error-codes';
-import Token from '../token/token.model';
-import { generateAuthTokens, verifyToken } from '../token/token.service';
-import tokenTypes from '../token/token.types';
-import { IUserDoc, IUserWithTokens } from '../user/user.interfaces';
-import { getErrorData } from '../utils/get-error-data';
-import { userService } from './../user/user.service';
+import { TokenTypes } from '../token/token.model';
 
 /**
  * Login with username and password
@@ -14,7 +11,7 @@ import { userService } from './../user/user.service';
  * @param {string} password
  * @returns {Promise<IUserDoc>}
  */
-const loginUserWithEmailAndPassword = async (email: string, password: string): Promise<IUserDoc> => {
+const loginUserWithEmailAndPassword = async (email: string, password: string): Promise<TUserDoc> => {
   const user = await userService.getByEmail(email);
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError({
@@ -35,7 +32,7 @@ const loginUserWithEmailAndPassword = async (email: string, password: string): P
 const logout = async (refreshToken: string): Promise<void> => {
   const refreshTokenDoc = await Token.findOne({
     token: refreshToken,
-    type: tokenTypes.REFRESH,
+    type: TokenTypes.REFRESH,
     blacklisted: false,
   });
 
@@ -53,11 +50,11 @@ const logout = async (refreshToken: string): Promise<void> => {
 /**
  * Refresh auth tokens
  * @param {string} refreshToken
- * @returns {Promise<IUserWithTokens>}
+ * @returns {Promise<TUserWithTokens>}
  */
-const refreshAuth = async (refreshToken: string): Promise<IUserWithTokens> => {
+const refreshAuth = async (refreshToken: string): Promise<TUserWithTokens> => {
   try {
-    const refreshTokenDoc = await verifyToken(refreshToken, tokenTypes.REFRESH);
+    const refreshTokenDoc = await tokenService.verifyToken(refreshToken, TokenTypes.REFRESH);
     const user = await userService.queryById(refreshTokenDoc.user);
 
     if (!user) {
@@ -69,7 +66,7 @@ const refreshAuth = async (refreshToken: string): Promise<IUserWithTokens> => {
     }
 
     await refreshTokenDoc.deleteOne();
-    const tokens = await generateAuthTokens(user);
+    const tokens = await tokenService.generateAuthTokens(user);
 
     return { user, tokens };
   } catch (error) {
@@ -91,7 +88,7 @@ const refreshAuth = async (refreshToken: string): Promise<IUserWithTokens> => {
  */
 const resetPassword = async (resetPasswordToken: string, newPassword: string): Promise<void> => {
   try {
-    const resetPasswordTokenDoc = await verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
+    const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, TokenTypes.RESET_PASSWORD);
     const user = await userService.queryById(resetPasswordTokenDoc.user);
 
     if (!user) {
@@ -103,7 +100,7 @@ const resetPassword = async (resetPasswordToken: string, newPassword: string): P
     }
 
     await userService.updateById(user.id, { password: newPassword });
-    await Token.deleteMany({ user: user.id, type: tokenTypes.RESET_PASSWORD });
+    await Token.deleteMany({ user: user.id, type: TokenTypes.RESET_PASSWORD });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
@@ -124,9 +121,9 @@ const resetPassword = async (resetPasswordToken: string, newPassword: string): P
  * @param {string} verifyEmailToken
  * @returns {Promise<IUserDoc | null>}
  */
-const verifyEmail = async (verifyEmailToken: string): Promise<IUserDoc | null> => {
+const verifyEmail = async (verifyEmailToken: string): Promise<TUserDoc | null> => {
   try {
-    const verifyEmailTokenDoc = await verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
+    const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, TokenTypes.VERIFY_EMAIL);
     const user = await userService.queryById(verifyEmailTokenDoc.user);
 
     if (!user) {
@@ -137,7 +134,7 @@ const verifyEmail = async (verifyEmailToken: string): Promise<IUserDoc | null> =
       });
     }
 
-    await Token.deleteMany({ user: user.id, type: tokenTypes.VERIFY_EMAIL });
+    await Token.deleteMany({ user: user.id, type: TokenTypes.VERIFY_EMAIL });
     const updatedUser = await userService.updateById(user.id, {
       isEmailVerified: true,
     });

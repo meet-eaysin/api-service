@@ -1,4 +1,11 @@
-import paginate from './paginate';
-import * as paginateTypes from './paginate.types';
-
-export { paginate, paginateTypes };
+export { paginate } from './paginate';
+export type {
+  TOptions,
+  TProject,
+  TProjectDoc,
+  TProjectModel,
+  TQueryResult,
+  TTask,
+  TTaskDoc,
+  TTaskModel,
+} from './paginate.types';
