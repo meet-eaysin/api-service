@@ -32,6 +32,9 @@ const createHandler = async (req: Request, res: Response) => {
 const queryHandler = async (req: Request, res: Response) => {
   const filter = pick(req.query, ['name', 'role', 'status', 'createdAt', 'updatedAt']);
   const options: TOptions = pick(req.query, ['sortBy', 'limit', 'page', 'projectBy']);
+
+  console.log('req.query===========', req.query);
+
   const result = await userService.query(filter, options);
 
   sendResponse({
