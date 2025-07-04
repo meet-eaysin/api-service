@@ -1,7 +1,4 @@
-# RESTful API Node Typescript Server Boilerplate
-
-[![Node.js CI](https://github.com/saisilinus/node-express-mongoose-typescript-boilerplate/actions/workflows/node.js.yml/badge.svg)](https://github.com/saisilinus/node-express-mongoose-typescript-boilerplate/actions/workflows/node.js.yml)
-[![codecov](https://codecov.io/gh/saisilinus/node-express-mongoose-typescript-boilerplate/branch/master/graph/badge.svg?token=UYJAL9KTMD)](https://codecov.io/gh/saisilinus/node-express-mongoose-typescript-boilerplate)
+# API Service
 
 By running a single command, you will get a production-ready Node.js TypeScript app installed and fully configured on your machine. The app comes with many built-in features, such as authentication using JWT, request validation, unit and integration tests, continuous integration, docker support, API documentation, pagination, etc. For more details, check the features list below.
 
@@ -489,10 +486,6 @@ To maintain a consistent coding style across different IDEs, the project contain
 ## Contributing
 
 Contributions are more than welcome! Please check out the [contributing guide](CONTRIBUTING.md).
-
-## Inspirations
-
-- [hagopj13/node-express-boilerplate](https://github.com/hagopj13/node-express-boilerplate.git)
 
 ## License
 
